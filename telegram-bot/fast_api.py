@@ -38,13 +38,18 @@ async def read_item(num: int, q: str | None = None):
     return {"num":num}
 
 
-async def start_api():
+def start_api():
     print("FastAPI is running...")
     uvicorn.run("fast_api:app", host="0.0.0.0", port=8000, reload=True)
 
 async def main():
     # await asyncio.gather(start_api(), bot.start_bot())
-    await asyncio.gather(start_api())
+    # await asyncio.gather(start_api())
+    task1 = asyncio.create_task(start_api())
+    task2 = asyncio.create_task(bot.start_bot())
+    await task1
+    await task2
+
 
 if __name__ == "__main__":
     asyncio.run(main())

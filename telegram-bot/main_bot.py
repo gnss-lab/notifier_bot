@@ -81,10 +81,13 @@ async def echo_message(message):
 
 
 
-async def start_bot():
+
+async def start_loop():
 	print("Bot is running...")
 	# notify_all("Какой-то сервис не работает")
 	await bot.polling()
 
+def start_bot():
+	asyncio.run(start_loop())
 if __name__ == "__main__":
     asyncio.run(start_bot())
