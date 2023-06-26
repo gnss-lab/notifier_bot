@@ -80,8 +80,6 @@ async def echo_message(message):
 	await bot.reply_to(message, f'You said: "{message.text}"!')
 
 
-
-
 async def start_loop():
 	print("Bot is running...")
 	# notify_all("Какой-то сервис не работает")
@@ -89,5 +87,7 @@ async def start_loop():
 
 def start_bot():
 	asyncio.run(start_loop())
+
 if __name__ == "__main__":
     asyncio.run(start_bot())
+

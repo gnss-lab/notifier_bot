@@ -3,6 +3,8 @@ from telebot.async_telebot import AsyncTeleBot
 import asyncio
 import time
 import threading
+from database import *
+
 
 bot = AsyncTeleBot(secrets.API_TOKEN)
 
@@ -14,6 +16,12 @@ async def check_db():
         global count
         count += 1
         print(count)
+        print(get_unread_messages())
+        for row in get_unread_messages():
+            mid, msg = row
+            await bot.send_message(5718232858,msg)
+            mark_message_as_read(mid)
+
         await asyncio.sleep(1)
         # time.sleep(1)
 
