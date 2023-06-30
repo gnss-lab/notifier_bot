@@ -1,7 +1,9 @@
+import asyncio
 import sqlite3 as sql
 import threading
 import time
 import uuid
+from .settings import settings, bot
 # from messages import MENU_STEP
 
 
@@ -24,11 +26,36 @@ class LockableSqliteConnection(object):
         self.lock.release()
 
 
-db_path = r"databases\main_bot.db"
+db_path = r".\databases\main_bot.db"
 lsc = LockableSqliteConnection(db_path)
+def setup_lsc():
+    with lsc:
+        lsc.cursor.execute(f"create table if not exists commands (id INTEGER PRIMARY KEY, text text, read int DEFAULT 0)")
+setup_lsc()
+
+# Функция для проверки внешних команд
+async def check_db():
+    while True:
+        commands:list = get_unread_commands()
+        for command in commands:
+            cid, text = command
+            for uid in settings.subscribers:
+                await bot.send_message(uid, text)
+            mark_command_as_read(cid)
+        await asyncio.sleep(1)
+
+def get_unread_commands():
+    with lsc:
+        lsc.cursor.execute(f"SELECT id, text FROM commands WHERE read = 0")
+        result = lsc.cursor.fetchall()
+    return result
+
+def mark_command_as_read(command_id):
+    with lsc:
+        lsc.cursor.execute(f"UPDATE commands SET read = 1 WHERE id = {command_id}")
 
 
-# Фукнция, генерирующая айди проблемы и совета
+# Фукнция, генерирующая айди
 def generate_id() -> str:
     return str(uuid.uuid4())
 
@@ -62,3 +89,7 @@ def user_exist(user_id: str) -> bool:
 #         lsc.cursor.execute(
 #             f"INSERT INTO users (id, step, tg_username, join_time) VALUES('{user_id}', '{MENU_STEP}', '{tg_username}', '{now}')"
 #         )
+
+
+# with lsc:
+#     lsc.cursor.execute(f"INSERT INTO commands (text) VALUES ('hello test 24')")
