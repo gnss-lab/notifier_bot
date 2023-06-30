@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     tg_token: str
 
     admins: list
+    subscribers: list
 
     bot: Optional[AsyncTeleBot]
 
@@ -22,9 +23,5 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
 
 
-def get_settings() -> Settings:
-    return Settings()
-
-
-settings = get_settings()
+settings = Settings()
 bot = settings.bot
