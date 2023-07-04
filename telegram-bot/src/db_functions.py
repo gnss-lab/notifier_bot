@@ -1,11 +1,8 @@
 import asyncio
 import sqlite3 as sql
 import threading
-import time
-import uuid
 from .settings import settings, bot
-# from messages import MENU_STEP
-
+from .dto import *
 
 class LockableSqliteConnection(object):
     def __init__(self, db):
@@ -28,68 +25,80 @@ class LockableSqliteConnection(object):
 
 db_path = r".\databases\main_bot.db"
 lsc = LockableSqliteConnection(db_path)
-def setup_lsc():
+def create_tables():
     with lsc:
-        lsc.cursor.execute(f"create table if not exists commands (id INTEGER PRIMARY KEY, text text, read int DEFAULT 0)")
-setup_lsc()
+        lsc.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS notifications (
+              id INTEGER PRIMARY KEY,
+              message TEXT,
+              group_id INTEGER,
+              processed INT DEFAULT 0
+            );
+            """)
+        lsc.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS notif_groups (
+              id INTEGER PRIMARY KEY,
+              description TEXT
+            );
+            """)
+        lsc.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS subscriptions (
+              id INTEGER PRIMARY KEY,
+              group_id INTEGER,
+              user_id INTEGER,
+              remind INT
+            );
+            """)
+        lsc.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+              id INTEGER PRIMARY KEY,
+              telegram_id INTEGER
+            );
+            """)
 
-# Функция для проверки внешних команд
+create_tables()
+
+# Функция проверяющая, не пришли ли новые уведомления
 async def check_db():
     while True:
-        commands:list = get_unread_commands()
-        for command in commands:
-            cid, text = command
-            for uid in settings.subscribers:
-                await bot.send_message(uid, text)
-            mark_command_as_read(cid)
+        notifications = get_new_notifications()
+        for notif in notifications:
+            for subs in get_subscriptions_by_group_id(notif.group_id):
+                user = get_user_by_id(subs.user_id)
+                if user:
+                    await bot.send_message(user.telegram_id, notif.message)
+
+        mark_notifications_as_processed(notifications)
         await asyncio.sleep(1)
 
-def get_unread_commands():
+def get_new_notifications():
     with lsc:
-        lsc.cursor.execute(f"SELECT id, text FROM commands WHERE read = 0")
+        lsc.cursor.execute(f"SELECT * FROM notifications WHERE processed = 0")
         result = lsc.cursor.fetchall()
-    return result
+    return list(map(lambda x: Notification(*x), result))
 
-def mark_command_as_read(command_id):
+def mark_notifications_as_processed(notifications: list[Notification]):
     with lsc:
-        lsc.cursor.execute(f"UPDATE commands SET read = 1 WHERE id = {command_id}")
+        for notif in notifications:
+            lsc.cursor.execute(f"UPDATE notifications SET processed = 1 WHERE id = {notif.id}")
 
-
-# Фукнция, генерирующая айди
-def generate_id() -> str:
-    return str(uuid.uuid4())
-
-
-# Фукнция, возвращающая шаг, на котором сейчас находится пользователь
-def check_step(user_id: str) -> str:
+def get_subscriptions_by_group_id(group_id):
     with lsc:
-        lsc.cursor.execute(f"SELECT step FROM users WHERE id = '{user_id}'")
-        result = lsc.cursor.fetchall()[0][0]
-    return result
+        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE group_id = {group_id}")
+        result = lsc.cursor.fetchall()
+    return list(map(lambda x: Subscription(*x), result))
 
-
-# Фукнция, меняющая шаг, на котором сейчас находится пользователь
-def insert_step(n: str, user_id: str) -> None:
+def get_user_by_id(user_id):
     with lsc:
-        lsc.cursor.execute(f"UPDATE users SET step = '{n}' WHERE id = '{user_id}'")
-
-
-# Фукнция, проверяющая есть ли пользователь в базе данных
-def user_exist(user_id: str) -> bool:
-    with lsc:
-        lsc.cursor.execute(f"SELECT id FROM users WHERE id = '{user_id}'")
-        exist = lsc.cursor.fetchone()
-    return exist
-
-
-# Фукнция, создающая пользователя в базе данных
-# def create_user(user_id: str, tg_username: str) -> None:
-#     with lsc:
-#         now = int(time.time())
-#         lsc.cursor.execute(
-#             f"INSERT INTO users (id, step, tg_username, join_time) VALUES('{user_id}', '{MENU_STEP}', '{tg_username}', '{now}')"
-#         )
-
+        lsc.cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
+        result = lsc.cursor.fetchone()
+    if not result:
+        return None
+    return User(*result)
 
 # with lsc:
 #     lsc.cursor.execute(f"INSERT INTO commands (text) VALUES ('hello test 24')")
+
+# INSERT INTO users (id, telegram_id) VALUES (1, 5718232858);
+# INSERT INTO notifications (id, message, group_id) VALUES (1, 'Test notification message!', 1);
+# INSERT INTO subscriptions (id, group_id, user_id, remind) VALUES (1, 1, 1, 1);
