@@ -1,8 +1,12 @@
 import asyncio
 import sqlite3 as sql
 import threading
+
+import schedule
+
 from .settings import settings, bot
 from .dto import *
+from .functions import send_notification, schedule_notification
 
 class LockableSqliteConnection(object):
     def __init__(self, db):
@@ -66,9 +70,12 @@ async def check_db():
             for subs in get_subscriptions_by_group_id(notif.group_id):
                 user = get_user_by_id(subs.user_id)
                 if user:
-                    await bot.send_message(user.telegram_id, notif.message)
-
-        mark_notifications_as_processed(notifications)
+                    await send_notification(user.telegram_id, notif.message, subs.remind)
+                    if subs.remind:
+                        schedule_notification(user.telegram_id, notif.message)
+        if notifications:
+            mark_notifications_as_processed(notifications)
+        schedule.run_pending()
         await asyncio.sleep(1)
 
 def get_new_notifications():
