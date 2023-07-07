@@ -1,8 +1,7 @@
 from .settings import bot
 from . import messages as ms
 from telebot.types import Message
-# from db_functions import user_exist, insert_step, create_user
-# from keyboards import menu_markup
+from .db_functions import test_subscription
 
 @bot.message_handler(commands=["start"])
 async def handle_start_command(message: Message) -> None:
@@ -16,3 +15,7 @@ async def handle_start_command(message: Message) -> None:
     #     )
     #     insert_step(ms.MENU_STEP, message.chat.id)
     await bot.send_message(message.chat.id, ms.WELCOME_MESSAGE)
+
+@bot.message_handler(commands=["subscribe"])
+async def subscribe_command(message: Message) -> None:
+    test_subscription()

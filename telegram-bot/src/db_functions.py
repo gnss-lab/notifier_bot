@@ -103,6 +103,10 @@ def get_user_by_id(user_id):
         return None
     return User(*result)
 
+def test_subscription():
+    with lsc:
+        lsc.cursor.execute(f"UPDATE notifications SET processed = 0 WHERE id = 1")
+
 # with lsc:
 #     lsc.cursor.execute(f"INSERT INTO commands (text) VALUES ('hello test 24')")
 
