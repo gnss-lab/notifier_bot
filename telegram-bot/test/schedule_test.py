@@ -1,6 +1,7 @@
-import schedule
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import time
 from datetime import datetime
+import asyncio
 
 def job_that_executes_once():
 
@@ -12,10 +13,8 @@ def sh(text):
     def some_job():
         print("hi", text)
 
-    schedule.every(3).seconds.do(some_job)
+    # schedule.every(3).seconds.do(some_job)
 
-import schedule
-import asyncio
 
 
 async def my_async_function():
@@ -23,17 +22,33 @@ async def my_async_function():
     await asyncio.sleep(1)
     print("Async function executed")
 
-async def main_async():
+async def main_async1(n):
+    print(f"main_async1 start {n=}")
+    await asyncio.sleep(.1)
+    print(f"main_async1 end {n=}")
+
+n = 0
+scheduler = AsyncIOScheduler()
+
+
+async def main_async2():
     while True:
-        print("main_async")
-        await asyncio.sleep(1)
+        print("main_async2")
+        await asyncio.sleep(.5)
+        global n
+        n+=1
+        if n%3==0:
+            scheduler.add_job(main_async1, 'interval', args=(n,), seconds=1)
 
-def run_async_function():
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(my_async_function())
+
+async def gather():
+    scheduler.start()
+    await asyncio.gather(main_async2())
 
 
-schedule.every(1).seconds.do(run_async_function)
+asyncio.run(gather())
 
-while True:
-    schedule.run_pending()
+# schedule.every(1).seconds.do(run_async_function)
+
+
+asyncio.get_event_loop().run_forever()

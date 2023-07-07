@@ -1,6 +1,7 @@
 from pydantic import BaseSettings
 from typing import Optional
 from telebot.async_telebot import AsyncTeleBot
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 
 class Settings(BaseSettings):
@@ -25,3 +26,4 @@ class Settings(BaseSettings):
 
 settings = Settings()
 bot = settings.bot
+scheduler = AsyncIOScheduler()

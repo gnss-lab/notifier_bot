@@ -1,9 +1,7 @@
-import schedule
-
 from telebot.types import Message
 from telebot import types
-from .settings import bot
-import asyncio
+from .settings import bot, scheduler
+from . import messages
 
 scheduled_jobs = dict()
 
@@ -23,16 +21,13 @@ async def send_notification(telegram_id, message, add_keyboard=False):
         await bot.send_message(telegram_id, message)
 
 def schedule_notification(telegram_id, message):
-
-    def notify():
-        # RuntimeError: This event loop is already running
-        asyncio.run(send_notification(telegram_id, message, True))
-
-    job = schedule.every(3).seconds.do(notify)
+    job = scheduler.add_job(send_notification, 'interval', args=(telegram_id, message, True), seconds=5)
     if telegram_id in scheduled_jobs:
-        schedule.cancel_job(scheduled_jobs[telegram_id])
+        scheduled_jobs[telegram_id].remove()
     scheduled_jobs[telegram_id] = job
 
-def cancel_notification(telegram_id):
+async def cancel_notification(telegram_id):
     if telegram_id in scheduled_jobs:
+        scheduled_jobs[telegram_id].remove()
         del scheduled_jobs[telegram_id]
+    await bot.send_message(telegram_id, messages.NOTIFICATION_DISABLED)
