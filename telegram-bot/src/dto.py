@@ -4,22 +4,25 @@ from dataclasses import dataclass
 class Notification:
     id: int
     message: str
-    group_id: int
+    sub_id: int
     processed: int
 
 @dataclass
-class NotifGroup:
+class Subscription:
     id: int
+    name: str
     description: str
 
 @dataclass
 class User:
     id: int
-    telegram_id: int
+
+# user_id = telegram_id
+
 
 @dataclass
-class Subscription:
+class UsersSubscription:
     id: int
-    group_id: int
+    sub_id: int
     user_id: int
     remind: int
