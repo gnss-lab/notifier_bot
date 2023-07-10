@@ -118,6 +118,12 @@ def get_subscription_by_id(sub_id):
         return None
     return Subscription(*result)
 
+def get_subscriptions_for_user(user_id):
+    with lsc:
+        lsc.cursor.execute(f"SELECT * FROM users_subscriptions WHERE user_id = {user_id}")
+        result = lsc.cursor.fetchall()
+    return list(map(lambda x: UsersSubscription(*x), result))
+
 # INSERT INTO users (id) VALUES (5718232858);
 # INSERT INTO notifications (message, sub_id) VALUES ('Test notification message!', 1);
 # INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES (1, 5718232858, 1);

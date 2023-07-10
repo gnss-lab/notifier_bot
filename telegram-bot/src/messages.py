@@ -40,3 +40,8 @@ ADV_BUTTON = "Рекламная рассылка"
 HIDE_BUTTON = "👁️ Скрыть"
 
 NOTIFICATION_DISABLED="Уведомление выключено."
+NO_SUBSCRIPTIONS = "У вас нет подписок."
+REMIND_ON = "🔔"
+REMIND_OFF = "❌"
+
+YOUR_SUBSCRIPTIONS = "Ваши подписки"
