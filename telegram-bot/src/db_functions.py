@@ -68,11 +68,13 @@ async def check_db():
     while True:
         notifications = get_new_notifications()
         for notif in notifications:
-            for subs in get_users_subscriptions(notif.sub_id):
-                user = get_user_by_id(subs.user_id)
+            for sub in get_users_subscriptions(notif.sub_id):
+                user = get_user_by_id(sub.user_id)
                 if user:
-                    await send_notification(user.id, notif.message, subs.remind)
-                    if subs.remind:
+                    sub_name = get_subscription_by_id(sub.sub_id).name
+                    notif.message=f"{sub_name}:\n"+notif.message
+                    await send_notification(user.id, notif.message, sub.remind)
+                    if sub.remind:
                         schedule_notification(user.id, notif.message)
         if notifications:
             mark_notifications_as_processed(notifications)
@@ -108,6 +110,15 @@ def test_subscription():
     with lsc:
         lsc.cursor.execute(f"UPDATE notifications SET processed = 0 WHERE id = 1")
 
+def get_subscription_by_id(sub_id):
+    with lsc:
+        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE id = {sub_id}")
+        result = lsc.cursor.fetchone()
+    if not result:
+        return None
+    return Subscription(*result)
+
 # INSERT INTO users (id) VALUES (5718232858);
 # INSERT INTO notifications (message, sub_id) VALUES ('Test notification message!', 1);
 # INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES (1, 5718232858, 1);
+# INSERT INTO subscriptions (name, description) VALUES ("Test subscription", "This is a test subscription created for tests");
