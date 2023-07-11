@@ -7,8 +7,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 class Settings(BaseSettings):
     tg_token: str
 
-    admins: list
-    subscribers: list
+    # admins: list
 
     bot: Optional[AsyncTeleBot]
 
