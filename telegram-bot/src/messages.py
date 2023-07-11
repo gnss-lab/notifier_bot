@@ -1,47 +1,24 @@
-# steps
-MENU_STEP = "MENU"
-SECOND_STEP = "SECOND_STEP"
-THIRD_STEP = "THIRD_STEP"
+CALLBACK_SHOW_SUB_LIST = "ssub"
+CALLBACK_SHOW_SUB_CARD = "scard"
+CALLBACK_CHANGE_SUB = "csub"
+CALLBACK_CHANGE_NOTIF = "cnotif"
 
-
-# Кнопки для клавиатуры "Меню"
-FIRST_BUTTON = "FIRST_BUTTON"
-SECOND_BUTTON = "SECOND_BUTTON"
-THIRD_BUTTON = "THIRD_BUTTON"
-
-
-WELCOME_MESSAGE = "Добро пожаловать! Я Ванин бот. Зря вы мне написали 😈"
-ALREADY_REGISTERED_MESSAGE = "Вы уже зарегистрированы."
-NOT_REGISTERED_MESSAGE = (
-    "Вы ещё не прошли регистрацию ❌\nДавайте это исправим! Напишите команду /start."
-)
-
-
-WELCOME_ADMIN_MESSAGE = "Добро пожаловать, администратор."
-NOT_ADMIN_MESSAGE = "Тебе сюда нельзя:)"
-
-
-# admin callback actions
-ADMIN_STATISTICS = "admin_statistics"
-ADMIN_BAN_USER = "admin_ban_user"
-ADMIN_ADV = "admin_adv"
-
-# admin statistic action
-USER_COUNT_MESSAGE = "Количество пользователей"
-NEW_USERS_COUNT_MESSAGE = "Количество новых пользователей (24 часа)"
-WHO_IS_ON_WHAT_STEP_MESSAGE = "Кто на каком шаге"
-
-# Кнопки для inline клавиатуры админки
-STATISTICS_BUTTON = "Cтатистика"
-BAN_USER_BUTTON = "Забанить пользователя 🚫"
-ADV_BUTTON = "Рекламная рассылка"
-
-# Кнопки для inline клавиатуры для скрытия списка советов
-HIDE_BUTTON = "👁️ Скрыть"
+WELCOME_MESSAGE = "Добро пожаловать!"
 
 NOTIFICATION_DISABLED="Уведомление выключено."
 NO_SUBSCRIPTIONS = "У вас нет подписок."
 REMIND_ON = "🔔"
 REMIND_OFF = "❌"
+SUBSCRIBED = "✔"
+UNSUBSCRIBED = "❌"
+SUBSCRIPTION = "Подписка"
+NOTIFICATION = "Уведомление"
 
-YOUR_SUBSCRIPTIONS = "Ваши подписки"
+YOUR_SUBSCRIPTIONS = "Список ваших подписок:"
+WRONG_SUBSCRIPTION_NAME = "Неверное имя подписки"
+SUBSCRIBE = "Подписаться"
+UNSUBSCRIBE = "Отписаться"
+TURN_ON_NOTIF = "Включить 🔔"
+TURN_OFF_NOTIF = "Выключить 🔔"
+
+GO_BACK= "Вернуться"
