@@ -2,8 +2,6 @@ import asyncio
 import sqlite3 as sql
 import threading
 
-import schedule
-
 from .settings import settings, bot
 from .dto import *
 from .functions import send_notification, schedule_notification
@@ -78,7 +76,6 @@ async def check_db():
                         schedule_notification(user.id, notif.message)
         if notifications:
             mark_notifications_as_processed(notifications)
-        schedule.run_pending()
         await asyncio.sleep(1)
 
 def get_new_notifications():
@@ -106,7 +103,7 @@ def get_user_by_id(user_id):
         return None
     return User(*result)
 
-def test_subscription():
+def test_notification():
     with lsc:
         lsc.cursor.execute(f"UPDATE notifications SET processed = 0 WHERE id = 1")
 
@@ -118,7 +115,7 @@ def get_subscription_by_id(sub_id):
         return None
     return Subscription(*result)
 
-def get_subscriptions_for_user(user_id):
+def get_users_subscriptions_for_user(user_id):
     with lsc:
         lsc.cursor.execute(f"SELECT * FROM users_subscriptions WHERE user_id = {user_id}")
         result = lsc.cursor.fetchall()
