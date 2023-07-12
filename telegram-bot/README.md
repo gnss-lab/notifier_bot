@@ -20,6 +20,7 @@ sudo apt install python3.10-venv
 git clone https://github.com/vankad24/Simurg.git
 cd Simurg
 git checkout development
+cd telegram-bot
 ```
 
 Создаём виртуальное окружение
@@ -38,7 +39,6 @@ source venv/bin/activate
 
 Устанавливаем зависимости
 ```bash
-cd telegram-bot
 pip install poetry
 poetry install
 ```
@@ -47,6 +47,7 @@ poetry install
 ```env
 tg_token=your_telegram_bot_token
 ```
+
 ## Запуск 
 ```bash
 python main.py
@@ -55,7 +56,8 @@ python main.py
 - [x] Мониторинг БД на новые сообщения
 - [x] Оповещение подписанных пользователей
 - [x] Повтор напоминания, пока не будет нажата кнопка "Ок"
-- [ ] Команда для просмотра всех подписок
+- [x] Команда для просмотра своих подписок
+- [ ] Команда для просмотра других подписок
 - [ ] Команда для подписки/отписки, включение/выключение уведомлений
 - [ ] Команды для администраторов
 - [ ] Переход к реализации API
