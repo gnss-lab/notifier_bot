@@ -122,9 +122,26 @@ def get_users_subscriptions_for_user(user_id):
         result = lsc.cursor.fetchall()
     return list(map(lambda x: UsersSubscription(*x), result))
 
+def get_one_users_subscription(user_id, sub_id):
+    with lsc:
+        lsc.cursor.execute(f"SELECT * FROM users_subscriptions WHERE user_id = {user_id} AND sub_id={sub_id}")
+        result = lsc.cursor.fetchone()
+    if not result:
+        return None
+    return UsersSubscription(*result)
+
 def set_notification(remind, sub_id, user_id):
     with lsc:
         lsc.cursor.execute(f"UPDATE users_subscriptions SET remind = {remind} WHERE user_id={user_id} AND sub_id={sub_id}")
+
+def subscribe(sub_id, user_id):
+    with lsc:
+        lsc.cursor.execute(f"INSERT INTO users_subscriptions (sub_id, user_id) VALUES ({sub_id}, {user_id})")
+
+def unsubscribe(sub_id, user_id):
+    with lsc:
+        lsc.cursor.execute(f"DELETE FROM users_subscriptions WHERE sub_id={sub_id} AND user_id={user_id}")
+
 
 # INSERT INTO users (id) VALUES (5718232858);
 # INSERT INTO notifications (message, sub_id) VALUES ('Test notification message!', 1);

@@ -1,7 +1,7 @@
 from .settings import bot
 from .functions import cancel_notification
 from .command_handlers import show_subscription_card, show_subscription_list_for_user
-from .db_functions import set_notification
+from .db_functions import set_notification, get_one_users_subscription, subscribe, unsubscribe
 from . import messages as ms
 from telebot.types import CallbackQuery
 
@@ -17,8 +17,13 @@ async def sub_callback(call: CallbackQuery) -> None:
     need_subscribe = data[1]=="on"
     sub_id = int(data[2])
     message_id = call.message.message_id
-    # await show_subscription_card(user_id, sub_id, message_id)
-    await bot.send_message(user_id, f"{need_subscribe=},{sub_id=}")
+    sub = get_one_users_subscription(user_id, sub_id)
+    if need_subscribe:
+        if not sub:
+            subscribe(sub_id, user_id)
+    elif sub:
+        unsubscribe(sub_id, user_id)
+    await show_subscription_card(user_id, sub_id, message_id)
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith(ms.CALLBACK_CHANGE_NOTIF))
 async def notif_callback(call: CallbackQuery) -> None:

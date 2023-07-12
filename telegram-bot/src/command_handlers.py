@@ -1,7 +1,7 @@
 from .settings import bot
 from . import messages as ms
 from telebot.types import Message
-from .db_functions import test_notification, get_users_subscriptions_for_user, get_subscription_by_id
+from .db_functions import test_notification, get_users_subscriptions_for_user, get_subscription_by_id, get_one_users_subscription
 import requests
 from telebot import types
 
@@ -47,23 +47,23 @@ async def show_subscription_list_for_user(user_id, changeable_message_id=None):
 
 async def show_subscription_card(user_id, sub_id, changeable_message_id=None):
     sub_info = get_subscription_by_id(sub_id)
-    sub = next((x for x in get_users_subscriptions_for_user(user_id) if x.sub_id==sub_id),None)
+    sub = get_one_users_subscription(user_id, sub_id)
     keyboard = types.InlineKeyboardMarkup(row_width=2)
     text = f"{sub_info.name}\n{sub_info.description}\n"
     if sub:
         if sub.remind:
-            notif_button = types.InlineKeyboardButton(ms.TURN_OFF_NOTIF, callback_data=f"{ms.CALLBACK_CHANGE_NOTIF};off;{sub.sub_id}")
+            notif_button = types.InlineKeyboardButton(ms.TURN_OFF_NOTIF, callback_data=f"{ms.CALLBACK_CHANGE_NOTIF};off;{sub_id}")
             notif_mark = ms.REMIND_ON
         else:
-            notif_button = types.InlineKeyboardButton(ms.TURN_ON_NOTIF, callback_data=f"{ms.CALLBACK_CHANGE_NOTIF};on;{sub.sub_id}")
+            notif_button = types.InlineKeyboardButton(ms.TURN_ON_NOTIF, callback_data=f"{ms.CALLBACK_CHANGE_NOTIF};on;{sub_id}")
             notif_mark = ms.REMIND_OFF
-        sub_button = types.InlineKeyboardButton(ms.SUBSCRIBE, callback_data=f"{ms.CALLBACK_CHANGE_SUB};off;{sub.sub_id}")
+        sub_button = types.InlineKeyboardButton(ms.UNSUBSCRIBE, callback_data=f"{ms.CALLBACK_CHANGE_SUB};off;{sub_id}")
         keyboard.add(sub_button, notif_button)
 
         text+=f"{ms.SUBSCRIPTION}:{ms.SUBSCRIBED}\n{ms.NOTIFICATION}:{notif_mark}"
     else:
         text+=f"{ms.SUBSCRIPTION}:{ms.UNSUBSCRIBED}"
-        sub_button = types.InlineKeyboardButton(ms.SUBSCRIBE, callback_data=f"{ms.CALLBACK_CHANGE_SUB};on;{sub.sub_id}")
+        sub_button = types.InlineKeyboardButton(ms.SUBSCRIBE, callback_data=f"{ms.CALLBACK_CHANGE_SUB};on;{sub_id}")
         keyboard.add(sub_button, row_width=2)
 
     back_button = types.InlineKeyboardButton(ms.GO_BACK, callback_data=ms.CALLBACK_SHOW_SUB_LIST)
