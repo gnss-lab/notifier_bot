@@ -18,7 +18,7 @@ async def add_subscription(sub_name: str, sub_description: str):
     db.add_subscription(sub_name, sub_description)
 
 @app.get("/subscribe")
-async def subscribe(sub_id:int, user_id:int, remind:bool):
+async def subscribe(sub_id:int, user_id:int, remind:bool = False):
     db.subscribe(sub_id, user_id, remind)
 
 @app.get("/send_notification")
