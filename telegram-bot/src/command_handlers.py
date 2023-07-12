@@ -22,6 +22,10 @@ async def joke_command(message: Message) -> None:
     joke_text = requests.get('https://geek-jokes.sameerkumar.website/api?format=json').json()["joke"]
     await bot.send_message(message.chat.id, joke_text)
 
+@bot.message_handler(commands=["id"])
+async def joke_command(message: Message) -> None:
+    await bot.send_message(message.chat.id, str(message.chat.id))
+
 @bot.message_handler(commands=["my_subscriptions"])
 async def my_subscriptions_command(message: Message) -> None:
     await show_subscription_list_for_user(message.chat.id)
