@@ -10,6 +10,8 @@ packages = [{include = "telegram_bot"}]
 python = "^3.10"
 pytelegrambotapi = "^4.12.0"
 apscheduler = "^3.10.1"
+aiohttp = "^3.8.4"
+pydantic = {version = "1.10.11", extras = ["dotenv"]}
 
 
 [build-system]
