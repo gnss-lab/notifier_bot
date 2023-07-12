@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Vankad24 <vankad24@mail.ru>"]
 readme = "README.md"
-packages = [{include = "telegram_bot"}]
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
