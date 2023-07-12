@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from datetime import datetime
+
 
 @dataclass
 class Notification:
@@ -26,3 +28,4 @@ class UsersSubscription:
     sub_id: int
     user_id: int
     remind: int
+    created_on: datetime

@@ -49,7 +49,8 @@ def create_tables():
               id INTEGER PRIMARY KEY,
               sub_id INTEGER,
               user_id INTEGER,
-              remind INT
+              remind INT DEFAULT 0,
+              created_on DATETIME NOT NULL DEFAULT 'NOW()'
             );
             """)
         lsc.cursor.execute("""
