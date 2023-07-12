@@ -34,7 +34,8 @@ def create_tables():
               id INTEGER PRIMARY KEY,
               message TEXT,
               sub_id INTEGER,
-              processed INT DEFAULT 0
+              processed INT DEFAULT 0,
+              created_on DATETIME NOT NULL DEFAULT (datetime('now'))
             );
             """)
         lsc.cursor.execute("""
@@ -50,7 +51,7 @@ def create_tables():
               sub_id INTEGER,
               user_id INTEGER,
               remind INT DEFAULT 0,
-              created_on DATETIME NOT NULL DEFAULT 'NOW()'
+              created_on DATETIME NOT NULL DEFAULT (datetime('now'))
             );
             """)
         lsc.cursor.execute("""

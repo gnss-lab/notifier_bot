@@ -8,6 +8,7 @@ class Notification:
     message: str
     sub_id: int
     processed: int
+    created_on: datetime
 
 @dataclass
 class Subscription:
