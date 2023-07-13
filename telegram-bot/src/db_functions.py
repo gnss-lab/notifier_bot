@@ -1,15 +1,16 @@
 import asyncio
 import sqlite3 as sql
 import threading
+import os
 
 from .settings import settings, bot
 from .dto import *
 from .functions import send_notification, schedule_notification
 
 class LockableSqliteConnection(object):
-    def __init__(self, db):
+    def __init__(self, path):
         self.lock = threading.Lock()
-        self.connection = sql.connect(db, uri=True, check_same_thread=False)
+        self.connection = sql.connect(path, uri=True, check_same_thread=False)
         self.cursor = None
 
     def __enter__(self):
@@ -24,9 +25,13 @@ class LockableSqliteConnection(object):
             self.cursor = None
         self.lock.release()
 
+DB_FILENAME = "main_bot.db"
+DB_FOLDER = "databases"
+DB_PATH = os.path.join(DB_FOLDER, DB_FILENAME)
+if not os.path.isdir(DB_FOLDER):
+    os.makedirs(DB_FOLDER)
+lsc = LockableSqliteConnection(DB_PATH)
 
-db_path = r".\databases\main_bot.db"
-lsc = LockableSqliteConnection(db_path)
 def create_tables():
     with lsc:
         lsc.cursor.execute("""
