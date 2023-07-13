@@ -27,7 +27,7 @@ class LockableSqliteConnection(object):
 
 DB_FILENAME = "main_bot.db"
 DB_FOLDER = "databases"
-DB_PATH = os.path.join(DB_FOLDER, DB_FILENAME)
+DB_PATH = os.path.join(os.path.normpath(DB_FOLDER), DB_FILENAME)
 if not os.path.isdir(DB_FOLDER):
     os.makedirs(DB_FOLDER)
 lsc = LockableSqliteConnection(DB_PATH)

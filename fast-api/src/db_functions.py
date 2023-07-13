@@ -1,6 +1,6 @@
-import asyncio
 import sqlite3 as sql
 import threading
+import os
 
 class LockableSqliteConnection(object):
     def __init__(self, db):
@@ -20,9 +20,12 @@ class LockableSqliteConnection(object):
             self.cursor = None
         self.lock.release()
 
-
-db_path = r"..\telegram-bot\databases\main_bot.db"
-lsc = LockableSqliteConnection(db_path)
+DB_FILENAME = "main_bot.db"
+DB_FOLDER = "../telegram-bot/databases"
+DB_PATH = os.path.join(os.path.normpath(DB_FOLDER), DB_FILENAME)
+if not os.path.isdir(DB_FOLDER):
+    os.makedirs(DB_FOLDER)
+lsc = LockableSqliteConnection(DB_PATH)
 
 def add_user(user_id):
     with lsc:
