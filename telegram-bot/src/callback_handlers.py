@@ -1,6 +1,6 @@
 from .settings import bot
 from .functions import cancel_notification
-from .command_handlers import show_subscription_card, show_subscription_list_for_user
+from .command_handlers import show_subscription_card, show_subscriptions_list, show_my_subscriptions, show_not_my_subscriptions
 from .db_functions import set_notification, get_one_users_subscription, subscribe, unsubscribe
 from . import messages as ms
 from telebot.types import CallbackQuery
@@ -46,4 +46,8 @@ async def show_sub_card_callback(call: CallbackQuery) -> None:
 async def show_sub_list_callback(call: CallbackQuery) -> None:
     user_id = call.from_user.id
     message_id = call.message.message_id
-    await show_subscription_list_for_user(user_id, changeable_message_id=message_id)
+    show_my_subs = call.data.split(";")[1] == "1"
+    if show_my_subs:
+        await show_my_subscriptions(user_id, message_id)
+    else:
+        await show_not_my_subscriptions(user_id, message_id)

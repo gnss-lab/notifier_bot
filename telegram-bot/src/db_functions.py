@@ -117,11 +117,17 @@ def get_subscription_by_id(sub_id):
         return None
     return Subscription(*result)
 
-def get_users_subscriptions_for_user(user_id):
+def get_subscriptions_for_user(user_id):
     with lsc:
-        lsc.cursor.execute(f"SELECT * FROM users_subscriptions WHERE user_id = {user_id}")
+        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE id IN (SELECT sub_id FROM users_subscriptions WHERE user_id={user_id})")
         result = lsc.cursor.fetchall()
-    return list(map(lambda x: UsersSubscription(*x), result))
+    return list(map(lambda x: Subscription(*x), result))
+
+def get_not_subscriptions_for_user(user_id):
+    with lsc:
+        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE id NOT IN (SELECT sub_id FROM users_subscriptions WHERE user_id={user_id})")
+        result = lsc.cursor.fetchall()
+    return list(map(lambda x: Subscription(*x), result))
 
 def get_one_users_subscription(user_id, sub_id):
     with lsc:

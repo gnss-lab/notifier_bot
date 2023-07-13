@@ -7,14 +7,17 @@ WELCOME_MESSAGE = "Добро пожаловать!"
 
 NOTIFICATION_DISABLED="Уведомление выключено."
 NO_SUBSCRIPTIONS = "У вас нет подписок."
+YOU_SUBSCRIBED_EVERYTHING = "Вы подписаны на всё!"
+
 REMIND_ON = "🔔"
 REMIND_OFF = "❌"
 SUBSCRIBED = "✔"
 UNSUBSCRIBED = "❌"
 SUBSCRIPTION = "Подписка"
-NOTIFICATION = "Уведомление"
+NOTIFICATION = "Уведомления"
 
 YOUR_SUBSCRIPTIONS = "Список ваших подписок:"
+SUBSCRIPTIONS_YOU_NOT_SUBSCRIBED = "Выберите, из следующего списка:"
 WRONG_SUBSCRIPTION_NAME = "Неверное имя подписки"
 SUBSCRIBE = "Подписаться"
 UNSUBSCRIBE = "Отписаться"

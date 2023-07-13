@@ -1,17 +1,14 @@
 from .settings import bot
 from . import messages as ms
 from telebot.types import Message
-from .db_functions import test_notification, get_users_subscriptions_for_user, get_subscription_by_id, get_one_users_subscription
+from .db_functions import test_notification, get_subscription_by_id, \
+    get_one_users_subscription, get_subscriptions_for_user, get_not_subscriptions_for_user
 import requests
 from telebot import types
 
 @bot.message_handler(commands=["start"])
 async def handle_start_command(message: Message) -> None:
     await bot.send_message(message.chat.id, ms.WELCOME_MESSAGE)
-
-@bot.message_handler(commands=["subscribe"])
-async def subscribe_command(message: Message) -> None:
-    pass
 
 @bot.message_handler(commands=["test_notification"])
 async def test_notification_command(message: Message) -> None:
@@ -28,24 +25,34 @@ async def joke_command(message: Message) -> None:
 
 @bot.message_handler(commands=["my_subscriptions"])
 async def my_subscriptions_command(message: Message) -> None:
-    await show_subscription_list_for_user(message.chat.id)
+    await show_my_subscriptions(message.chat.id)
 
-async def show_subscription_list_for_user(user_id, changeable_message_id=None):
-    subs = get_users_subscriptions_for_user(user_id)
-    if subs:
+@bot.message_handler(commands=["subscribe"])
+async def subscribe_command(message: Message) -> None:
+    await show_not_my_subscriptions(message.chat.id)
+
+async def show_subscriptions_list(sub_list:list, user_id, success_message, fail_message,changeable_message_id=None):
+    if sub_list:
         keyboard = types.InlineKeyboardMarkup(row_width=1)
-        for sub in subs:
-            sub_info = get_subscription_by_id(sub.sub_id)
-            button = types.InlineKeyboardButton(sub_info.name, callback_data=f"{ms.CALLBACK_SHOW_SUB_CARD};{sub.sub_id}")
+        for sub in sub_list:
+            button = types.InlineKeyboardButton(sub.name, callback_data=f"{ms.CALLBACK_SHOW_SUB_CARD};{sub.id}")
             keyboard.add(button)
         if changeable_message_id:
-            await bot.edit_message_text(ms.YOUR_SUBSCRIPTIONS, user_id, changeable_message_id, reply_markup=keyboard)
+            await bot.edit_message_text(success_message, user_id, changeable_message_id, reply_markup=keyboard)
         else:
-            await bot.send_message(user_id, ms.YOUR_SUBSCRIPTIONS, reply_markup=keyboard)
+            await bot.send_message(user_id, success_message, reply_markup=keyboard)
     else:
-        await bot.send_message(user_id, ms.NO_SUBSCRIPTIONS)
+        await bot.send_message(user_id, fail_message)
 
-async def show_subscription_card(user_id, sub_id, changeable_message_id=None):
+async def show_my_subscriptions(user_id, changeable_message_id=None):
+    subs = get_subscriptions_for_user(user_id)
+    await show_subscriptions_list(subs, user_id, ms.YOUR_SUBSCRIPTIONS, ms.NO_SUBSCRIPTIONS, changeable_message_id)
+
+async def show_not_my_subscriptions(user_id, changeable_message_id=None):
+    subs = get_not_subscriptions_for_user(user_id)
+    await show_subscriptions_list(subs, user_id, ms.SUBSCRIPTIONS_YOU_NOT_SUBSCRIBED, ms.YOU_SUBSCRIBED_EVERYTHING, changeable_message_id)
+
+async def show_subscription_card(user_id, sub_id, changeable_message_id=None, callback_my_subs=True):
     sub_info = get_subscription_by_id(sub_id)
     sub = get_one_users_subscription(user_id, sub_id)
     keyboard = types.InlineKeyboardMarkup(row_width=2)
@@ -66,7 +73,8 @@ async def show_subscription_card(user_id, sub_id, changeable_message_id=None):
         sub_button = types.InlineKeyboardButton(ms.SUBSCRIBE, callback_data=f"{ms.CALLBACK_CHANGE_SUB};on;{sub_id}")
         keyboard.add(sub_button, row_width=2)
 
-    back_button = types.InlineKeyboardButton(ms.GO_BACK, callback_data=ms.CALLBACK_SHOW_SUB_LIST)
+    callback_data = ms.CALLBACK_SHOW_SUB_LIST+ ";" + ("1" if callback_my_subs else "0")
+    back_button = types.InlineKeyboardButton(ms.GO_BACK, callback_data=callback_data)
     keyboard.add(back_button)
 
     if changeable_message_id:
