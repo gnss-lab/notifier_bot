@@ -65,6 +65,14 @@ def create_tables():
               
             );
             """)
+        lsc.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS fastapi_users (
+              id INTEGER PRIMARY KEY
+              email TEXT,
+              username TEXT,
+              hashed_password TEXT
+            );
+            """)
 # user_id = telegram_id
 create_tables()
 

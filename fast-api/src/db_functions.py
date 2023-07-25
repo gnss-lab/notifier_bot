@@ -2,6 +2,9 @@ import sqlite3 as sql
 import threading
 import os
 
+from .models import UserInDB
+
+
 class LockableSqliteConnection(object):
     def __init__(self, db):
         self.lock = threading.Lock()
@@ -67,8 +70,19 @@ def get_notifications():
         result = lsc.cursor.fetchall()
         return result
 
+def get_user_by_name(username):
+    with lsc:
+        lsc.cursor.execute(f"SELECT * FROM fastapi_users WHERE username = {username}")
+        r = lsc.cursor.fetchone()
+    if not r:
+        return None
+    return UserInDB(id=r[0],email=r[1],username=r[2],hashed_password=r[3])
 
+def add_fastapi_user(username, email, hashed_password):
+    with lsc:
+        lsc.cursor.execute(f"INSERT INTO fastapi_users (username, email, hashed_password) VALUES ({username},{email},{hashed_password})")
+
+# INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES (1, 5718232858, 1);
 # INSERT INTO users (id) VALUES (5718232858);
 # INSERT INTO notifications (message, sub_id) VALUES ('Test notification message!', 1);
-# INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES (1, 5718232858, 1);
 # INSERT INTO subscriptions (name, description) VALUES ("Test subscription", "This is a test subscription created for tests");
