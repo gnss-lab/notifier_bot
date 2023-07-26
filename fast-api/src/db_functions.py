@@ -72,7 +72,7 @@ def get_notifications():
 
 def get_user_by_name(username):
     with lsc:
-        lsc.cursor.execute(f"SELECT * FROM fastapi_users WHERE username = {username}")
+        lsc.cursor.execute(f"SELECT * FROM fastapi_users WHERE username = '{username}'")
         r = lsc.cursor.fetchone()
     if not r:
         return None
@@ -80,7 +80,7 @@ def get_user_by_name(username):
 
 def add_fastapi_user(username, email, hashed_password):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO fastapi_users (username, email, hashed_password) VALUES ({username},{email},{hashed_password})")
+        lsc.cursor.execute(f"INSERT INTO fastapi_users (username, email, hashed_password) VALUES ('{username}','{email}','{hashed_password}')")
 
 # INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES (1, 5718232858, 1);
 # INSERT INTO users (id) VALUES (5718232858);

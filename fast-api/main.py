@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta, datetime
 
 from src.models import User, UserInDB, Token, RegisterUser, TokenData
@@ -10,15 +11,15 @@ from typing import Annotated, Union
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
 
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+
+SECRET_KEY = os.getenv('FAST_API_SECRET')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 app = FastAPI()
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -69,7 +70,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 async def root():
     return RedirectResponse("/docs")
 
-@app.get("/register", response_model=User)
+@app.post("/register", response_model=User)
 async def register(user: RegisterUser):
     db_user = db.get_user_by_name(user.username)
     if not db_user:
@@ -98,22 +99,29 @@ async def login(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+@app.get("/fastapiusers/me/", response_model=User)
+async def read_users_me(
+    current_user: Annotated[User, Depends(get_current_user)]
+):
+    return current_user
 
 @app.get("/add/user")
-async def add_user(user_id: int):
+async def add_user(user_id: int, current_user: Annotated[User, Depends(get_current_user)]):
     """user_id = telegram_id"""
     db.add_user(user_id)
 
 @app.get("/add/subscription")
-async def add_subscription(sub_name: str, sub_description: str):
+async def add_subscription(sub_name: str, sub_description: str, current_user: Annotated[User, Depends(get_current_user)]):
     db.add_subscription(sub_name, sub_description)
 
 @app.get("/subscribe")
-async def subscribe(sub_id:int, user_id:int, remind:bool = False):
+async def subscribe(current_user: Annotated[User, Depends(get_current_user)],
+                    sub_id:int, user_id:int, remind:bool = False):
     db.subscribe(sub_id, user_id, remind)
 
 @app.get("/send_notification")
-async def send_notification(message: str, sub_id: int):
+async def send_notification(current_user: Annotated[User, Depends(get_current_user)],
+                            message: str, sub_id: int):
     db.add_notification(message, sub_id)
 
 @app.get("/get/users")
