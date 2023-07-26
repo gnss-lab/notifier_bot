@@ -105,12 +105,12 @@ async def read_users_me(
 ):
     return current_user
 
-@app.get("/add/user")
+@app.get("/user/add")
 async def add_user(user_id: int, current_user: Annotated[User, Depends(get_current_user)]):
     """user_id = telegram_id"""
     db.add_user(user_id)
 
-@app.get("/add/subscription")
+@app.get("/subscription/add")
 async def add_subscription(sub_name: str, sub_description: str, current_user: Annotated[User, Depends(get_current_user)]):
     db.add_subscription(sub_name, sub_description)
 
@@ -124,19 +124,19 @@ async def send_notification(current_user: Annotated[User, Depends(get_current_us
                             message: str, sub_id: int):
     db.add_notification(message, sub_id)
 
-@app.get("/get/users")
+@app.get("/users/get")
 async def get_users():
     return db.get_users()
 
-@app.get("/get/subscriptions")
+@app.get("/subscriptions/get")
 async def get_subscriptions():
     return db.get_subscriptions()
 
-@app.get("/get/users_subscriptions")
+@app.get("/users_subscriptions/get")
 async def get_users_subscriptions():
     return db.get_users_subscriptions()
 
-@app.get("/get/notifications")
+@app.get("/notifications/get")
 async def get_notifications():
     return db.get_notifications()
 
