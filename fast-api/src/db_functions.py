@@ -78,6 +78,15 @@ def get_user_by_name(username):
         return None
     return UserInDB(id=r[0],email=r[1],username=r[2],hashed_password=r[3])
 
+def get_subscription_id_by_name(sub_name):
+    with lsc:
+        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE name = '{sub_name}' LIMIT 1")
+        r = lsc.cursor.fetchone()
+    if not r:
+        return None
+    return r[0]
+
+
 def add_fastapi_user(username, email, hashed_password):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO fastapi_users (username, email, hashed_password) VALUES ('{username}','{email}','{hashed_password}')")

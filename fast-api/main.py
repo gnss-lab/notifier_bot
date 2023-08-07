@@ -119,9 +119,15 @@ async def subscribe(current_user: Annotated[User, Depends(get_current_user)],
                     sub_id:int, user_id:int, remind:bool = False):
     db.subscribe(sub_id, user_id, remind)
 
-@app.get("/send_notification")
-async def send_notification(current_user: Annotated[User, Depends(get_current_user)],
+@app.get("/send_notification_by_id")
+async def send_notification_by_id(current_user: Annotated[User, Depends(get_current_user)],
                             message: str, sub_id: int):
+    db.add_notification(message, sub_id)
+
+@app.get("/send_notification_by_name")
+async def send_notification_by_name(current_user: Annotated[User, Depends(get_current_user)],
+                            message: str, sub_name: str):
+    sub_id = db.get_subscription_id_by_name(sub_name)
     db.add_notification(message, sub_id)
 
 @app.get("/users/get")

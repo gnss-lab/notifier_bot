@@ -17,7 +17,7 @@ SUBSCRIPTION = "Подписка"
 NOTIFICATION = "Уведомления"
 
 YOUR_SUBSCRIPTIONS = "Список ваших подписок:"
-SUBSCRIPTIONS_YOU_NOT_SUBSCRIBED = "Выберите, из следующего списка:"
+SUBSCRIPTIONS_YOU_NOT_SUBSCRIBED = "Выберите из следующего списка:"
 WRONG_SUBSCRIPTION_NAME = "Неверное имя подписки"
 SUBSCRIBE = "Подписаться"
 UNSUBSCRIBE = "Отписаться"
