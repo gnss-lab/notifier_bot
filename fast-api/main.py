@@ -108,27 +108,32 @@ async def read_users_me(
 @app.get("/user/add")
 async def add_user(user_id: int, current_user: Annotated[User, Depends(get_current_user)]):
     """user_id = telegram_id"""
-    db.add_user(user_id)
+    user_id = db.add_user(user_id)
+    return {"user_id":user_id}
 
 @app.get("/subscription/add")
 async def add_subscription(sub_name: str, sub_description: str, current_user: Annotated[User, Depends(get_current_user)]):
-    db.add_subscription(sub_name, sub_description)
+    sub_id = db.add_subscription(sub_name, sub_description)
+    return {"sub_id":sub_id}
 
 @app.get("/subscribe")
 async def subscribe(current_user: Annotated[User, Depends(get_current_user)],
                     sub_id:int, user_id:int, remind:bool = False):
-    db.subscribe(sub_id, user_id, remind)
+    usub_id = db.subscribe(sub_id, user_id, remind)
+    return {"usub_id":usub_id}
 
 @app.get("/send_notification_by_id")
 async def send_notification_by_id(current_user: Annotated[User, Depends(get_current_user)],
                             message: str, sub_id: int):
-    db.add_notification(message, sub_id, current_user.id)
+    notif_id = db.add_notification(message, sub_id, current_user.id)
+    return {"notif_id":notif_id}
 
 @app.get("/send_notification_by_name")
 async def send_notification_by_name(current_user: Annotated[User, Depends(get_current_user)],
                             message: str, sub_name: str):
     sub_id = db.get_subscription_id_by_name(sub_name)
-    db.add_notification(message, sub_id, current_user.id)
+    notif_id = db.add_notification(message, sub_id, current_user.id)
+    return {"notif_id": notif_id}
 
 @app.get("/users/get")
 async def get_users():

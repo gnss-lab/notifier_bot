@@ -33,18 +33,28 @@ lsc = LockableSqliteConnection(DB_PATH)
 def add_user(user_id):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO users (id) VALUES ({user_id})")
+        return user_id
 
 def add_subscription(name, description):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO subscriptions (name, description) VALUES ('{name}', '{description}')")
+        lsc.cursor.execute(f"SELECT id FROM subscriptions WHERE {name=}")
+        result = lsc.cursor.fetchall()
+        return result[-1][0]
 
 def subscribe(sub_id, user_id, remind):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES ({sub_id}, {user_id}, {remind})")
+        lsc.cursor.execute(f"SELECT id FROM users_subscriptions WHERE {sub_id=} AND {user_id=}")
+        result = lsc.cursor.fetchall()
+        return result[-1][0]
 
 def add_notification(message, sub_id, initiator_id):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO notifications (message, sub_id, initiator_id) VALUES ('{message}', {sub_id}, {initiator_id})")
+        lsc.cursor.execute(f"SELECT id FROM notifications WHERE {message=} AND {sub_id=} AND {initiator_id=}")
+        result = lsc.cursor.fetchall()
+        return result[-1][0]
 
 def get_users():
     with lsc:
