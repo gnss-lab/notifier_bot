@@ -8,13 +8,15 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Union[str, None] = None
 
-class User(BaseModel):
+class BaseUser(BaseModel):
     email: Union[str, None] = None
     username: str
 
-class UserInDB(User):
+class User(BaseUser):
     id: int
+
+class UserInDB(User):
     hashed_password: str
 
-class RegisterUser(User):
+class RegisterUser(BaseUser):
     password: str

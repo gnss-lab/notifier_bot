@@ -30,7 +30,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 def authenticate_user(username: str, password: str):
-    user = db.get_user_by_name(username)
+    user = db.get_fastapi_user_by_name(username)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -61,7 +61,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = db.get_user_by_name(token_data.username)
+    user = db.get_fastapi_user_by_name(token_data.username)
     if user is None:
         raise credentials_exception
     return user
@@ -72,10 +72,10 @@ async def root():
 
 @app.post("/register", response_model=User)
 async def register(user: RegisterUser):
-    db_user = db.get_user_by_name(user.username)
+    db_user = db.get_fastapi_user_by_name(user.username)
     if not db_user:
         db.add_fastapi_user(user.username, user.email, get_password_hash(user.password))
-        return db.get_user_by_name(user.username)
+        return db.get_fastapi_user_by_name(user.username)
     else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -99,7 +99,7 @@ async def login(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.get("/fastapiusers/me/", response_model=User)
+@app.get("/fastapi-users/me/", response_model=User)
 async def read_users_me(
     current_user: Annotated[User, Depends(get_current_user)]
 ):
@@ -122,13 +122,13 @@ async def subscribe(current_user: Annotated[User, Depends(get_current_user)],
 @app.get("/send_notification_by_id")
 async def send_notification_by_id(current_user: Annotated[User, Depends(get_current_user)],
                             message: str, sub_id: int):
-    db.add_notification(message, sub_id)
+    db.add_notification(message, sub_id, current_user.id)
 
 @app.get("/send_notification_by_name")
 async def send_notification_by_name(current_user: Annotated[User, Depends(get_current_user)],
                             message: str, sub_name: str):
     sub_id = db.get_subscription_id_by_name(sub_name)
-    db.add_notification(message, sub_id)
+    db.add_notification(message, sub_id, current_user.id)
 
 @app.get("/users/get")
 async def get_users():

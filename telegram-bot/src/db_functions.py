@@ -39,6 +39,7 @@ def create_tables():
               id INTEGER PRIMARY KEY,
               message TEXT,
               sub_id INTEGER,
+              initiator_id INTEGER,
               processed INT DEFAULT 0,
               created_on DATETIME NOT NULL DEFAULT (datetime('now'))
             );

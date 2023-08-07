@@ -7,6 +7,7 @@ class Notification:
     id: int
     message: str
     sub_id: int
+    initiator_id: int
     processed: int
     created_on: datetime
 

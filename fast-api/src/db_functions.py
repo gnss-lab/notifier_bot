@@ -42,9 +42,9 @@ def subscribe(sub_id, user_id, remind):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES ({sub_id}, {user_id}, {remind})")
 
-def add_notification(message, sub_id):
+def add_notification(message, sub_id, initiator_id):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO notifications (message, sub_id) VALUES ('{message}', {sub_id})")
+        lsc.cursor.execute(f"INSERT INTO notifications (message, sub_id, initiator_id) VALUES ('{message}', {sub_id}, {initiator_id})")
 
 def get_users():
     with lsc:
@@ -70,7 +70,7 @@ def get_notifications():
         result = lsc.cursor.fetchall()
         return result
 
-def get_user_by_name(username):
+def get_fastapi_user_by_name(username):
     with lsc:
         lsc.cursor.execute(f"SELECT * FROM fastapi_users WHERE username = '{username}'")
         r = lsc.cursor.fetchone()
