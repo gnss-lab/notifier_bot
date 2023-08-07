@@ -86,7 +86,7 @@ async def check_db():
                 user = get_user_by_id(sub.user_id)
                 if user:
                     sub_name = get_subscription_by_id(sub.sub_id).name
-                    notif.message=f"{sub_name}:\n"+notif.message
+                    notif.message=f"{sub_name}:\n{notif.message}\n\n{notif.created_on}"
                     await send_notification(user.id, notif.message, sub.remind)
                     if sub.remind:
                         schedule_notification(user.id, notif.message)
