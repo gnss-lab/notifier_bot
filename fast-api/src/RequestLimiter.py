@@ -6,16 +6,20 @@ from fastapi import HTTPException, status
 class RequestLimiter:
     def __init__(self, times=1, seconds=1):
         self.last_time = 0
-        self.times_per_second = times/seconds
-        # 1 / self.times_per_second
-        self.min_delay = seconds/times
+        self.counter = 0
+        self.times = times
+        self.seconds = seconds
 
     def __call__(self):
-        print(self.last_time)
         now = time.time()
-        if now - self.last_time < self.min_delay:
+        if now - self.last_time > self.seconds:
+            self.last_time = now
+            self.counter = 1
+        else:
+            self.counter+=1
+
+        if self.counter > self.times:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail=f"The API can process only {self.times_per_second} requests per second"
+                detail=f"The API can process only {self.times} requests per {self.seconds} seconds"
             )
-        self.last_time = now
