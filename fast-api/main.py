@@ -2,6 +2,7 @@ import os
 from datetime import timedelta, datetime
 
 from src.models import User, UserInDB, Token, RegisterUser, TokenData
+from src.RequestLimiter import RequestLimiter
 from fastapi.responses import RedirectResponse
 from jose import jwt, JWTError
 from passlib.context import CryptContext
@@ -21,7 +22,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
+send_notif_limiter = RequestLimiter(10)
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -99,6 +100,7 @@ async def login(
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
+
 @app.get("/fastapi-users/me/", response_model=User)
 async def read_users_me(
     current_user: Annotated[User, Depends(get_current_user)]
@@ -122,13 +124,13 @@ async def subscribe(current_user: Annotated[User, Depends(get_current_user)],
     usub_id = db.subscribe(sub_id, user_id, remind)
     return {"usub_id":usub_id}
 
-@app.get("/send_notification_by_id")
+@app.get("/send_notification_by_id", dependencies=[Depends(send_notif_limiter)])
 async def send_notification_by_id(current_user: Annotated[User, Depends(get_current_user)],
                             message: str, sub_id: int):
     notif_id = db.add_notification(message, sub_id, current_user.id)
     return {"notif_id":notif_id}
 
-@app.get("/send_notification_by_name")
+@app.get("/send_notification_by_name", dependencies=[Depends(send_notif_limiter)])
 async def send_notification_by_name(current_user: Annotated[User, Depends(get_current_user)],
                             message: str, sub_name: str):
     sub_id = db.get_subscription_id_by_name(sub_name)
@@ -150,5 +152,3 @@ async def get_users_subscriptions():
 @app.get("/notifications/get")
 async def get_notifications():
     return db.get_notifications()
-
-# uvicorn main:app --reload --host 0.0.0.0
