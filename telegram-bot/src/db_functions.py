@@ -77,11 +77,21 @@ def create_tables():
 # user_id = telegram_id
 create_tables()
 
-# Функция проверяющая, не пришли ли новые уведомления
+# Функция, проверяющая, не пришли ли новые уведомления
 async def check_db():
+    loop_repeat_delay = 1
+    messages_limit = 10
+    per_seconds_limit = 1
+
+    counter = 0
     while True:
         notifications = get_new_notifications()
         for notif in notifications:
+            if counter > messages_limit:
+                counter = 0
+                await asyncio.sleep(per_seconds_limit)
+            counter+=1
+
             for sub in get_users_subscriptions(notif.sub_id):
                 user = get_user_by_id(sub.user_id)
                 if user:
@@ -92,7 +102,7 @@ async def check_db():
                         schedule_notification(user.id, notif.message)
         if notifications:
             mark_notifications_as_processed(notifications)
-        await asyncio.sleep(1)
+        await asyncio.sleep(loop_repeat_delay)
 
 def get_new_notifications():
     with lsc:
