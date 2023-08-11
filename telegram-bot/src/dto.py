@@ -31,3 +31,13 @@ class UsersSubscription:
     user_id: int
     remind: int
     created_on: datetime
+
+@dataclass
+class MonitoredServices:
+    id: int
+    url: str
+    message: str
+    sub_id: int
+    initiator_id: int
+    last_processed: datetime
+    created_on: datetime

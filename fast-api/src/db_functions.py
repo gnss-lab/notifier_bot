@@ -8,7 +8,7 @@ from .models import UserInDB
 class LockableSqliteConnection(object):
     def __init__(self, db):
         self.lock = threading.Lock()
-        self.connection = sql.connect(db, uri=True, check_same_thread=False)
+        self.connection = sql.connect(db, uri=True, check_same_thread=False, detect_types=sql.PARSE_DECLTYPES | sql.PARSE_COLNAMES)
         self.cursor = None
 
     def __enter__(self):
@@ -60,10 +60,10 @@ def add_fastapi_user(username, email, hashed_password):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO fastapi_users (username, email, hashed_password) VALUES ('{username}','{email}','{hashed_password}')")
 
-def add_monitored_service(url, message, sub_id):
+def add_monitored_service(url, message, sub_id, initiator_id):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO monitored_services (message, sub_id, url) VALUES ('{message}', {sub_id}, '{url}')")
-        lsc.cursor.execute(f"SELECT id FROM monitored_services WHERE {message=} AND {sub_id=} AND {url=}")
+        lsc.cursor.execute(f"INSERT INTO monitored_services (message, sub_id, url, initiator_id) VALUES ('{message}', {sub_id}, '{url}', {initiator_id})")
+        lsc.cursor.execute(f"SELECT id FROM monitored_services WHERE {message=} AND {sub_id=} AND {url=} AND {initiator_id=}")
         result = lsc.cursor.fetchall()
         return result[-1][0]
 

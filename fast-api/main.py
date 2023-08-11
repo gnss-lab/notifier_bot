@@ -139,7 +139,7 @@ async def send_notification_by_name(current_user: Annotated[User, Depends(get_cu
 
 @app.get("/monitored_service/add")
 async def add_monitored_service(error_message: str, sub_id: int, url: str, current_user: Annotated[User, Depends(get_current_user)]):
-    ser_id = db.add_monitored_service(url, error_message, sub_id)
+    ser_id = db.add_monitored_service(url, error_message, sub_id, current_user.id)
     return {"sub_id":ser_id}
 
 @app.get("/monitored_service/delete")

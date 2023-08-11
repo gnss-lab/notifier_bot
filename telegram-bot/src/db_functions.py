@@ -3,6 +3,8 @@ import sqlite3 as sql
 import threading
 import os
 
+import requests
+
 from .settings import settings, bot
 from .dto import *
 from .functions import send_notification, schedule_notification
@@ -10,7 +12,7 @@ from .functions import send_notification, schedule_notification
 class LockableSqliteConnection(object):
     def __init__(self, path):
         self.lock = threading.Lock()
-        self.connection = sql.connect(path, uri=True, check_same_thread=False)
+        self.connection = sql.connect(path, uri=True, check_same_thread=False, detect_types=sql.PARSE_DECLTYPES | sql.PARSE_COLNAMES)
         self.cursor = None
 
     def __enter__(self):
@@ -41,7 +43,7 @@ def create_tables():
               sub_id INTEGER,
               initiator_id INTEGER,
               processed INT DEFAULT 0,
-              created_on DATETIME NOT NULL DEFAULT (datetime('now'))
+              created_on TIMESTAMP NOT NULL DEFAULT (datetime('now', 'localtime'))
             );
             """)
         lsc.cursor.execute("""
@@ -57,7 +59,7 @@ def create_tables():
               sub_id INTEGER,
               user_id INTEGER,
               remind INT DEFAULT 0,
-              created_on DATETIME NOT NULL DEFAULT (datetime('now'))
+              created_on TIMESTAMP NOT NULL DEFAULT (datetime('now', 'localtime'))
             );
             """)
         lsc.cursor.execute("""
@@ -80,7 +82,9 @@ def create_tables():
               url TEXT,
               message TEXT,
               sub_id INTEGER,
-              created_on DATETIME NOT NULL DEFAULT (datetime('now'))
+              initiator_id INTEGER,
+              last_processed TIMESTAMP NOT NULL DEFAULT (datetime('now', 'localtime')),
+              created_on TIMESTAMP NOT NULL DEFAULT (datetime('now', 'localtime'))
             );
             """)
 
@@ -113,11 +117,37 @@ async def check_db():
             mark_notifications_as_processed(notifications)
         await asyncio.sleep(loop_repeat_delay)
 
+        #services check
+        for service in get_all_services():
+            try:
+                response = requests.get(service.url)
+                failed = response.status_code >= 400
+            except:
+                failed = True
+
+            if failed:
+                delta = datetime.now() - service.last_processed
+                #send message once in 30 min
+                if delta.seconds >= 60 * 30:
+                    update_monitor_service(service.id)
+                    add_notification(service.message, service.sub_id, service.initiator_id)
+
 def get_new_notifications():
     with lsc:
         lsc.cursor.execute(f"SELECT * FROM notifications WHERE processed = 0")
         result = lsc.cursor.fetchall()
     return list(map(lambda x: Notification(*x), result))
+
+def get_all_services():
+    with lsc:
+        lsc.cursor.execute(f"SELECT * FROM monitored_services")
+        result = lsc.cursor.fetchall()
+    return list(map(lambda x: MonitoredServices(*x), result))
+
+def update_monitor_service(ser_id):
+    with lsc:
+        lsc.cursor.execute(f"UPDATE monitored_services SET last_processed=datetime('now', 'localtime') WHERE id = {ser_id}")
+
 
 def mark_notifications_as_processed(notifications: list[Notification]):
     with lsc:
@@ -181,6 +211,10 @@ def unsubscribe(sub_id, user_id):
 def add_telegram_user(user_id):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO users (id) VALUES ({user_id})")
+
+def add_notification(message, sub_id, initiator_id):
+    with lsc:
+        lsc.cursor.execute(f"INSERT INTO notifications (message, sub_id, initiator_id) VALUES ('{message}', {sub_id}, {initiator_id})")
 
 # INSERT INTO users (id) VALUES (5718232858);
 # INSERT INTO notifications (message, sub_id) VALUES ('Test notification message!', 1);
