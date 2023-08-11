@@ -129,10 +129,6 @@ def get_user_by_id(user_id):
         return None
     return User(*result)
 
-def test_notification():
-    with lsc:
-        lsc.cursor.execute(f"UPDATE notifications SET processed = 0 WHERE id = 1")
-
 def get_subscription_by_id(sub_id):
     with lsc:
         lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE id = {sub_id}")
@@ -173,6 +169,9 @@ def unsubscribe(sub_id, user_id):
     with lsc:
         lsc.cursor.execute(f"DELETE FROM users_subscriptions WHERE sub_id={sub_id} AND user_id={user_id}")
 
+def add_telegram_user(user_id):
+    with lsc:
+        lsc.cursor.execute(f"INSERT INTO users (id) VALUES ({user_id})")
 
 # INSERT INTO users (id) VALUES (5718232858);
 # INSERT INTO notifications (message, sub_id) VALUES ('Test notification message!', 1);

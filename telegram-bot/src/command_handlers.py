@@ -1,18 +1,15 @@
 from .settings import bot
 from . import messages as ms
 from telebot.types import Message
-from .db_functions import test_notification, get_subscription_by_id, \
+from .db_functions import get_subscription_by_id, add_telegram_user,\
     get_one_users_subscription, get_subscriptions_for_user, get_not_subscriptions_for_user
 import requests
 from telebot import types
 
 @bot.message_handler(commands=["start"])
 async def handle_start_command(message: Message) -> None:
+    add_telegram_user(message.chat.id)
     await bot.send_message(message.chat.id, ms.WELCOME_MESSAGE)
-
-@bot.message_handler(commands=["test_notification"])
-async def test_notification_command(message: Message) -> None:
-    test_notification()
 
 @bot.message_handler(commands=["joke"])
 async def joke_command(message: Message) -> None:
