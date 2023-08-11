@@ -56,6 +56,21 @@ def add_notification(message, sub_id, initiator_id):
         result = lsc.cursor.fetchall()
         return result[-1][0]
 
+def add_fastapi_user(username, email, hashed_password):
+    with lsc:
+        lsc.cursor.execute(f"INSERT INTO fastapi_users (username, email, hashed_password) VALUES ('{username}','{email}','{hashed_password}')")
+
+def add_monitored_service(url, message, sub_id):
+    with lsc:
+        lsc.cursor.execute(f"INSERT INTO monitored_services (message, sub_id, url) VALUES ('{message}', {sub_id}, '{url}')")
+        lsc.cursor.execute(f"SELECT id FROM monitored_services WHERE {message=} AND {sub_id=} AND {url=}")
+        result = lsc.cursor.fetchall()
+        return result[-1][0]
+
+def delete_monitored_services(ser_id):
+    with lsc:
+        lsc.cursor.execute(f"DELETE FROM monitored_services WHERE id={ser_id}")
+
 def get_users():
     with lsc:
         lsc.cursor.execute(f"SELECT * FROM users")
@@ -96,10 +111,17 @@ def get_subscription_id_by_name(sub_name):
         return None
     return r[0]
 
-
-def add_fastapi_user(username, email, hashed_password):
+def get_monitored_services():
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO fastapi_users (username, email, hashed_password) VALUES ('{username}','{email}','{hashed_password}')")
+        lsc.cursor.execute(f"SELECT * FROM monitored_services")
+        result = lsc.cursor.fetchall()
+        return result
+
+def get_monitored_service_by_id(ser_id):
+    with lsc:
+        lsc.cursor.execute(f"SELECT * FROM monitored_services WHERE id={ser_id}")
+        result = lsc.cursor.fetchone()
+        return result
 
 # INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES (1, 5718232858, 1);
 # INSERT INTO users (id) VALUES (5718232858);

@@ -74,7 +74,16 @@ def create_tables():
               hashed_password TEXT
             );
             """)
-# user_id = telegram_id
+        lsc.cursor.execute("""
+            CREATE TABLE IF NOT EXISTS monitored_services (
+              id INTEGER PRIMARY KEY,
+              url TEXT,
+              message TEXT,
+              sub_id INTEGER,
+              created_on DATETIME NOT NULL DEFAULT (datetime('now'))
+            );
+            """)
+
 create_tables()
 
 # Функция, проверяющая, не пришли ли новые уведомления

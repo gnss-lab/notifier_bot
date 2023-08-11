@@ -137,6 +137,15 @@ async def send_notification_by_name(current_user: Annotated[User, Depends(get_cu
     notif_id = db.add_notification(message, sub_id, current_user.id)
     return {"notif_id": notif_id}
 
+@app.get("/monitored_service/add")
+async def add_monitored_service(error_message: str, sub_id: int, url: str, current_user: Annotated[User, Depends(get_current_user)]):
+    ser_id = db.add_monitored_service(url, error_message, sub_id)
+    return {"sub_id":ser_id}
+
+@app.get("/monitored_service/delete")
+async def delete_monitored_service(service_id: int, current_user: Annotated[User, Depends(get_current_user)]):
+    db.delete_monitored_services(service_id)
+
 @app.get("/users/get")
 async def get_users():
     return db.get_users()
@@ -152,3 +161,11 @@ async def get_users_subscriptions():
 @app.get("/notifications/get")
 async def get_notifications():
     return db.get_notifications()
+
+@app.get("/monitored_services/get")
+async def get_monitored_services():
+    return db.get_monitored_services()
+
+@app.get("/monitored_service/get")
+async def get_monitored_service_by_id(ser_id: int):
+    return db.get_monitored_service_by_id(ser_id)
