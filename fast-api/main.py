@@ -1,6 +1,6 @@
 import os
 from datetime import timedelta, datetime
-
+from apscheduler.triggers.cron import CronTrigger
 from src.models import User, UserInDB, Token, RegisterUser, TokenData
 from src.RequestLimiter import RequestLimiter
 from fastapi.responses import RedirectResponse
@@ -138,13 +138,34 @@ async def send_notification_by_name(current_user: Annotated[User, Depends(get_cu
     return {"notif_id": notif_id}
 
 @app.get("/monitored_service/add")
-async def add_monitored_service(error_message: str, sub_id: int, url: str, current_user: Annotated[User, Depends(get_current_user)]):
-    ser_id = db.add_monitored_service(url, error_message, sub_id, current_user.id)
-    return {"sub_id":ser_id}
+async def add_monitored_service(error_message: str, sub_id: int, url: str, crontab: str, current_user: Annotated[User, Depends(get_current_user)]):
+    try:
+        CronTrigger.from_crontab(crontab)
+    except ValueError as e:
+        print(e.args)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect crontab string"
+        )
+    ser_id = db.add_monitored_service(url, error_message, sub_id, current_user.id, crontab)
+    return {"ser_id":ser_id}
 
 @app.get("/monitored_service/delete")
 async def delete_monitored_service(service_id: int, current_user: Annotated[User, Depends(get_current_user)]):
-    db.delete_monitored_services(service_id)
+    db.delete_monitored_service(service_id)
+
+@app.get("/monitored_service/update")
+async def update_monitored_service(ser_id: int, crontab: str, current_user: Annotated[User, Depends(get_current_user)]):
+    try:
+        CronTrigger.from_crontab(crontab)
+    except ValueError as e:
+        print(e.args)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect crontab string"
+        )
+    db.update_monitored_service(ser_id, crontab)
+    return {"sub_id":ser_id}
 
 @app.get("/users/get")
 async def get_users():
