@@ -60,16 +60,20 @@ def add_fastapi_user(username, email, hashed_password):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO fastapi_users (username, email, hashed_password) VALUES ('{username}','{email}','{hashed_password}')")
 
-def add_monitored_service(url, message, sub_id, initiator_id):
+def add_monitored_service(url, message, sub_id, initiator_id, cron_time):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO monitored_services (message, sub_id, url, initiator_id) VALUES ('{message}', {sub_id}, '{url}', {initiator_id})")
+        lsc.cursor.execute(f"INSERT INTO monitored_services (message, sub_id, url, initiator_id, cron_time) VALUES ('{message}', {sub_id}, '{url}', {initiator_id}, '{cron_time}')")
         lsc.cursor.execute(f"SELECT id FROM monitored_services WHERE {message=} AND {sub_id=} AND {url=} AND {initiator_id=}")
         result = lsc.cursor.fetchall()
         return result[-1][0]
 
-def delete_monitored_services(ser_id):
+def delete_monitored_service(ser_id):
     with lsc:
-        lsc.cursor.execute(f"DELETE FROM monitored_services WHERE id={ser_id}")
+        lsc.cursor.execute(f"UPDATE monitored_services SET need_delete = 1 WHERE id = {ser_id}")
+
+def update_monitored_service(ser_id, cron_time):
+    with lsc:
+        lsc.cursor.execute(f"UPDATE monitored_services SET cron_time = ?, processed = 0 WHERE id = ?", (cron_time, ser_id))
 
 def get_users():
     with lsc:

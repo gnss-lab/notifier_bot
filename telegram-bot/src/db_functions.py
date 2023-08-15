@@ -4,8 +4,9 @@ import threading
 import os
 
 import requests
+from apscheduler.triggers.cron import CronTrigger
 
-from .settings import settings, bot
+from .settings import settings, bot, scheduler
 from .dto import *
 from .functions import send_notification, schedule_notification
 
@@ -97,8 +98,15 @@ async def check_db():
     loop_repeat_delay = 1
     messages_limit = 10
     per_seconds_limit = 1
-
     counter = 0
+
+    for service in get_all_services():
+        if service.need_delete:
+            delete_monitored_service(service.id)
+        if not service.processed:
+            mark_service_as_processed(service.id)
+        schedule_service_checking(service)
+
     while True:
         notifications = get_new_notifications()
         for notif in notifications:
@@ -117,22 +125,32 @@ async def check_db():
                         schedule_notification(user.id, notif.message)
         if notifications:
             mark_notifications_as_processed(notifications)
+
+        for service in get_deleted_services():
+            delete_monitored_service(service.id)
+
+        for service in get_new_services():
+            mark_service_as_processed(service.id)
+            schedule_service_checking(service)
+
         await asyncio.sleep(loop_repeat_delay)
 
-        #services check
-        for service in get_all_services():
-            try:
-                response = requests.get(service.url)
-                failed = response.status_code >= 400
-            except:
-                failed = True
 
-            if failed:
-                delta = datetime.now() - service.last_processed
-                #send message once in 30 min
-                if delta.seconds >= 60 * 30:
-                    update_monitor_service(service.id)
-                    add_notification(service.message, service.sub_id, service.initiator_id)
+def check_service(service):
+    try:
+        response = requests.get(service.url)
+        failed = response.status_code >= 400
+    except:
+        failed = True
+
+    if failed:
+        add_notification(service.message, service.sub_id, service.initiator_id)
+    else:
+        print("ok")
+
+def schedule_service_checking(service):
+    scheduler.add_job(check_service, CronTrigger.from_crontab(service.cron_time), id=str(service.id), args=(service,), replace_existing=True)
+    # scheduler.get_job(str(ser_id), 'default')
 
 def get_new_notifications():
     with lsc:
@@ -146,9 +164,29 @@ def get_all_services():
         result = lsc.cursor.fetchall()
     return list(map(lambda x: MonitoredServices(*x), result))
 
-def update_monitor_service(ser_id):
+def get_new_services():
     with lsc:
-        lsc.cursor.execute(f"UPDATE monitored_services SET last_processed=datetime('now', 'localtime') WHERE id = {ser_id}")
+        lsc.cursor.execute(f"SELECT * FROM monitored_services WHERE processed = 0")
+        result = lsc.cursor.fetchall()
+    return list(map(lambda x: MonitoredServices(*x), result))
+
+def get_deleted_services():
+    with lsc:
+        lsc.cursor.execute(f"SELECT * FROM monitored_services WHERE need_delete = 1")
+        result = lsc.cursor.fetchall()
+    return list(map(lambda x: MonitoredServices(*x), result))
+
+def delete_monitored_service(ser_id):
+    with lsc:
+        lsc.cursor.execute(f"DELETE FROM monitored_services WHERE id={ser_id}")
+    job = scheduler.get_job(str(ser_id), 'default')
+    if job:
+        job.remove()
+
+def mark_service_as_processed(ser_id):
+    with lsc:
+        lsc.cursor.execute(f"UPDATE monitored_services SET processed = 1 WHERE id = {ser_id}")
+
 
 
 def mark_notifications_as_processed(notifications: list[Notification]):
