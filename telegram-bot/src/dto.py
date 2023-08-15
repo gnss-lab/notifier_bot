@@ -39,5 +39,7 @@ class MonitoredServices:
     message: str
     sub_id: int
     initiator_id: int
-    last_processed: datetime
+    cron_time: str
     created_on: datetime
+    processed: int
+    need_delete: int

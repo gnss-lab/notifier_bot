@@ -83,8 +83,10 @@ def create_tables():
               message TEXT,
               sub_id INTEGER,
               initiator_id INTEGER,
-              last_processed TIMESTAMP NOT NULL DEFAULT (datetime('now', 'localtime')),
-              created_on TIMESTAMP NOT NULL DEFAULT (datetime('now', 'localtime'))
+              cron_time TEXT,
+              created_on TIMESTAMP NOT NULL DEFAULT (datetime('now', 'localtime')),
+              processed INTEGER DEFAULT 0,
+              need_delete INTEGER DEFAULT 0
             );
             """)
 
