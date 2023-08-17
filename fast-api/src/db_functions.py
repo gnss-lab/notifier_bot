@@ -126,8 +126,3 @@ def get_monitored_service_by_id(ser_id):
         lsc.cursor.execute(f"SELECT * FROM monitored_services WHERE id=?", (ser_id,))
         result = lsc.cursor.fetchone()
         return result
-
-# INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES (1, 5718232858, 1);
-# INSERT INTO users (id) VALUES (5718232858);
-# INSERT INTO notifications (message, sub_id) VALUES ('Test notification message!', 1);
-# INSERT INTO subscriptions (name, description) VALUES ("Test subscription", "This is a test subscription created for tests");

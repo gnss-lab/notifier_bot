@@ -187,8 +187,6 @@ def mark_service_as_processed(ser_id):
     with lsc:
         lsc.cursor.execute(f"UPDATE monitored_services SET processed = 1 WHERE id = ?", (ser_id,))
 
-
-
 def mark_notifications_as_processed(notifications: list[Notification]):
     with lsc:
         for notif in notifications:
@@ -255,8 +253,3 @@ def add_telegram_user(user_id):
 def add_notification(message, sub_id, initiator_id):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO notifications (message, sub_id, initiator_id) VALUES (?, ?, ?)",(message,sub_id,initiator_id))
-
-# INSERT INTO users (id) VALUES (5718232858);
-# INSERT INTO notifications (message, sub_id) VALUES ('Test notification message!', 1);
-# INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES (1, 5718232858, 1);
-# INSERT INTO subscriptions (name, description) VALUES ("Test subscription", "This is a test subscription created for tests");
