@@ -178,31 +178,31 @@ def get_deleted_services():
 
 def delete_monitored_service(ser_id):
     with lsc:
-        lsc.cursor.execute(f"DELETE FROM monitored_services WHERE id={ser_id}")
+        lsc.cursor.execute(f"DELETE FROM monitored_services WHERE id=?", (ser_id,))
     job = scheduler.get_job(str(ser_id), 'default')
     if job:
         job.remove()
 
 def mark_service_as_processed(ser_id):
     with lsc:
-        lsc.cursor.execute(f"UPDATE monitored_services SET processed = 1 WHERE id = {ser_id}")
+        lsc.cursor.execute(f"UPDATE monitored_services SET processed = 1 WHERE id = ?", (ser_id,))
 
 
 
 def mark_notifications_as_processed(notifications: list[Notification]):
     with lsc:
         for notif in notifications:
-            lsc.cursor.execute(f"UPDATE notifications SET processed = 1 WHERE id = {notif.id}")
+            lsc.cursor.execute(f"UPDATE notifications SET processed = 1 WHERE id = ?", (notif.id,))
 
 def get_users_subscriptions(sub_id):
     with lsc:
-        lsc.cursor.execute(f"SELECT * FROM users_subscriptions WHERE sub_id = {sub_id}")
+        lsc.cursor.execute(f"SELECT * FROM users_subscriptions WHERE sub_id = ?", (sub_id,))
         result = lsc.cursor.fetchall()
     return list(map(lambda x: UsersSubscription(*x), result))
 
 def get_user_by_id(user_id):
     with lsc:
-        lsc.cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")
+        lsc.cursor.execute(f"SELECT * FROM users WHERE id = ?", (user_id,))
         result = lsc.cursor.fetchone()
     if not result:
         return None
@@ -210,7 +210,7 @@ def get_user_by_id(user_id):
 
 def get_subscription_by_id(sub_id):
     with lsc:
-        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE id = {sub_id}")
+        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE id = ?", (sub_id,))
         result = lsc.cursor.fetchone()
     if not result:
         return None
@@ -218,19 +218,19 @@ def get_subscription_by_id(sub_id):
 
 def get_subscriptions_for_user(user_id):
     with lsc:
-        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE id IN (SELECT sub_id FROM users_subscriptions WHERE user_id={user_id})")
+        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE id IN (SELECT sub_id FROM users_subscriptions WHERE user_id= ?)", (user_id,))
         result = lsc.cursor.fetchall()
     return list(map(lambda x: Subscription(*x), result))
 
 def get_not_subscriptions_for_user(user_id):
     with lsc:
-        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE id NOT IN (SELECT sub_id FROM users_subscriptions WHERE user_id={user_id})")
+        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE id NOT IN (SELECT sub_id FROM users_subscriptions WHERE user_id=?)", (user_id,))
         result = lsc.cursor.fetchall()
     return list(map(lambda x: Subscription(*x), result))
 
 def get_one_users_subscription(user_id, sub_id):
     with lsc:
-        lsc.cursor.execute(f"SELECT * FROM users_subscriptions WHERE user_id = {user_id} AND sub_id={sub_id}")
+        lsc.cursor.execute(f"SELECT * FROM users_subscriptions WHERE user_id = ? AND sub_id=?", (user_id,sub_id))
         result = lsc.cursor.fetchone()
     if not result:
         return None
@@ -238,23 +238,23 @@ def get_one_users_subscription(user_id, sub_id):
 
 def set_notification(remind, sub_id, user_id):
     with lsc:
-        lsc.cursor.execute(f"UPDATE users_subscriptions SET remind = {remind} WHERE user_id={user_id} AND sub_id={sub_id}")
+        lsc.cursor.execute(f"UPDATE users_subscriptions SET remind = ? WHERE user_id= ? AND sub_id=?", (remind,user_id,sub_id))
 
 def subscribe(sub_id, user_id):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO users_subscriptions (sub_id, user_id) VALUES ({sub_id}, {user_id})")
+        lsc.cursor.execute(f"INSERT INTO users_subscriptions (sub_id, user_id) VALUES (?, ?)",(sub_id,user_id))
 
 def unsubscribe(sub_id, user_id):
     with lsc:
-        lsc.cursor.execute(f"DELETE FROM users_subscriptions WHERE sub_id={sub_id} AND user_id={user_id}")
+        lsc.cursor.execute(f"DELETE FROM users_subscriptions WHERE sub_id=? AND user_id=?", (sub_id, user_id))
 
 def add_telegram_user(user_id):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO users (id) VALUES ({user_id})")
+        lsc.cursor.execute(f"INSERT INTO users (id) VALUES (?)",(user_id,))
 
 def add_notification(message, sub_id, initiator_id):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO notifications (message, sub_id, initiator_id) VALUES ('{message}', {sub_id}, {initiator_id})")
+        lsc.cursor.execute(f"INSERT INTO notifications (message, sub_id, initiator_id) VALUES (?, ?, ?)",(message,sub_id,initiator_id))
 
 # INSERT INTO users (id) VALUES (5718232858);
 # INSERT INTO notifications (message, sub_id) VALUES ('Test notification message!', 1);

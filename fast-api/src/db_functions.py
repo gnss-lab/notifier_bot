@@ -32,44 +32,44 @@ lsc = LockableSqliteConnection(DB_PATH)
 
 def add_user(user_id):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO users (id) VALUES ({user_id})")
+        lsc.cursor.execute(f"INSERT INTO users (id) VALUES (?)", (user_id,))
         return user_id
 
 def add_subscription(name, description):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO subscriptions (name, description) VALUES ('{name}', '{description}')")
-        lsc.cursor.execute(f"SELECT id FROM subscriptions WHERE {name=}")
-        result = lsc.cursor.fetchall()
-        return result[-1][0]
+        lsc.cursor.execute(f"INSERT INTO subscriptions (name, description) VALUES (?, ?)", (name,description))
+        lsc.cursor.execute(f"SELECT MAX(id) FROM subscriptions")
+        result = lsc.cursor.fetchone()
+        return result[0]
 
 def subscribe(sub_id, user_id, remind):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES ({sub_id}, {user_id}, {remind})")
-        lsc.cursor.execute(f"SELECT id FROM users_subscriptions WHERE {sub_id=} AND {user_id=}")
-        result = lsc.cursor.fetchall()
-        return result[-1][0]
+        lsc.cursor.execute(f"INSERT INTO users_subscriptions (sub_id, user_id, remind) VALUES (?, ?, ?)",(sub_id,user_id,remind))
+        lsc.cursor.execute(f"SELECT MAX(id) FROM users_subscriptions")
+        result = lsc.cursor.fetchone()
+        return result[0]
 
 def add_notification(message, sub_id, initiator_id):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO notifications (message, sub_id, initiator_id) VALUES ('{message}', {sub_id}, {initiator_id})")
-        lsc.cursor.execute(f"SELECT id FROM notifications WHERE {message=} AND {sub_id=} AND {initiator_id=}")
-        result = lsc.cursor.fetchall()
-        return result[-1][0]
+        lsc.cursor.execute(f"INSERT INTO notifications (message, sub_id, initiator_id) VALUES (?, ?, ?)",(message,sub_id, initiator_id))
+        lsc.cursor.execute(f"SELECT MAX(id) FROM notifications")
+        result = lsc.cursor.fetchone()
+        return result[0]
 
 def add_fastapi_user(username, email, hashed_password):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO fastapi_users (username, email, hashed_password) VALUES ('{username}','{email}','{hashed_password}')")
+        lsc.cursor.execute(f"INSERT INTO fastapi_users (username, email, hashed_password) VALUES (?,?,?)", (username,email,hashed_password))
 
 def add_monitored_service(url, message, sub_id, initiator_id, cron_time):
     with lsc:
-        lsc.cursor.execute(f"INSERT INTO monitored_services (message, sub_id, url, initiator_id, cron_time) VALUES ('{message}', {sub_id}, '{url}', {initiator_id}, '{cron_time}')")
-        lsc.cursor.execute(f"SELECT id FROM monitored_services WHERE {message=} AND {sub_id=} AND {url=} AND {initiator_id=}")
-        result = lsc.cursor.fetchall()
-        return result[-1][0]
+        lsc.cursor.execute(f"INSERT INTO monitored_services (message, sub_id, url, initiator_id, cron_time) VALUES (?,?,?,?,?)", (message, sub_id, url, initiator_id,cron_time))
+        lsc.cursor.execute(f"SELECT MAX(id) FROM monitored_services")
+        result = lsc.cursor.fetchone()
+        return result[0]
 
 def delete_monitored_service(ser_id):
     with lsc:
-        lsc.cursor.execute(f"UPDATE monitored_services SET need_delete = 1 WHERE id = {ser_id}")
+        lsc.cursor.execute(f"UPDATE monitored_services SET need_delete = 1 WHERE id = ?", (ser_id,))
 
 def update_monitored_service(ser_id, cron_time):
     with lsc:
@@ -101,7 +101,7 @@ def get_notifications():
 
 def get_fastapi_user_by_name(username):
     with lsc:
-        lsc.cursor.execute(f"SELECT * FROM fastapi_users WHERE username = '{username}'")
+        lsc.cursor.execute(f"SELECT * FROM fastapi_users WHERE username = ? LIMIT 1", (username,))
         r = lsc.cursor.fetchone()
     if not r:
         return None
@@ -109,7 +109,7 @@ def get_fastapi_user_by_name(username):
 
 def get_subscription_id_by_name(sub_name):
     with lsc:
-        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE name = '{sub_name}' LIMIT 1")
+        lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE name =? LIMIT 1", (sub_name,))
         r = lsc.cursor.fetchone()
     if not r:
         return None
@@ -123,7 +123,7 @@ def get_monitored_services():
 
 def get_monitored_service_by_id(ser_id):
     with lsc:
-        lsc.cursor.execute(f"SELECT * FROM monitored_services WHERE id={ser_id}")
+        lsc.cursor.execute(f"SELECT * FROM monitored_services WHERE id=?", (ser_id,))
         result = lsc.cursor.fetchone()
         return result
 
