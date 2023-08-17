@@ -6,6 +6,8 @@ from src.RequestLimiter import RequestLimiter
 from fastapi.responses import RedirectResponse
 from jose import jwt, JWTError
 from passlib.context import CryptContext
+from src.logger import setup_logger
+from loguru import logger
 
 import src.db_functions as db
 from typing import Annotated, Union
@@ -23,6 +25,8 @@ app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 send_notif_limiter = RequestLimiter(10)
+setup_logger()
+
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)

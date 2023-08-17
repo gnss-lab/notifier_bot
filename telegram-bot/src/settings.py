@@ -2,7 +2,7 @@ from pydantic import BaseSettings
 from typing import Optional
 from telebot.async_telebot import AsyncTeleBot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-
+from loguru import logger
 
 class Settings(BaseSettings):
     tg_token: str
@@ -14,8 +14,7 @@ class Settings(BaseSettings):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.bot = AsyncTeleBot(self.tg_token)
-        print("Starting bot...")
-        # print(self.bot.get_me())
+        logger.info("Starting bot...")
 
     # for auto importing .env variables by BaseSettings module
     class Config:
