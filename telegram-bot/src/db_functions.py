@@ -250,6 +250,14 @@ def add_telegram_user(user_id):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO users (id) VALUES (?)",(user_id,))
 
+def telegram_user_exists(user_id):
+    with lsc:
+        lsc.cursor.execute(f"SELECT id FROM users WHERE id=? LIMIT 1",(user_id,))
+        result = lsc.cursor.fetchone()
+    if not result:
+        return False
+    return True
+
 def add_notification(message, sub_id, initiator_id):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO notifications (message, sub_id, initiator_id) VALUES (?, ?, ?)",(message,sub_id,initiator_id))
