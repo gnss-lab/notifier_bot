@@ -4,14 +4,17 @@ from .command_handlers import show_subscription_card, show_my_subscriptions, sho
 from .db_functions import set_notification, get_one_users_subscription, subscribe, unsubscribe
 from . import messages as ms
 from telebot.types import CallbackQuery
+from loguru import logger
 
 @bot.callback_query_handler(func=lambda call: call.data == "ok")
 async def callback(call: CallbackQuery) -> None:
+    logger.debug(f"{call.data} {call.from_user.id}")
     if call.data == "ok":
         await cancel_notification(call.from_user.id)
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith(ms.CALLBACK_CHANGE_SUB))
 async def sub_callback(call: CallbackQuery) -> None:
+    logger.debug(f"{call.data} {call.from_user.id}")
     user_id = call.from_user.id
     data = call.data.split(";")
     need_subscribe = data[1]=="on"
@@ -28,6 +31,7 @@ async def sub_callback(call: CallbackQuery) -> None:
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith(ms.CALLBACK_CHANGE_NOTIF))
 async def notif_callback(call: CallbackQuery) -> None:
+    logger.debug(f"{call.data} {call.from_user.id}")
     user_id = call.from_user.id
     data = call.data.split(";")
     remind = data[1]=="on"
@@ -39,6 +43,7 @@ async def notif_callback(call: CallbackQuery) -> None:
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith(ms.CALLBACK_SHOW_SUB_CARD))
 async def show_sub_card_callback(call: CallbackQuery) -> None:
+    logger.debug(f"{call.data} {call.from_user.id}")
     user_id = call.from_user.id
     message_id = call.message.message_id
     data = call.data.split(";")
@@ -48,6 +53,7 @@ async def show_sub_card_callback(call: CallbackQuery) -> None:
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith(ms.CALLBACK_SHOW_SUB_LIST))
 async def show_sub_list_callback(call: CallbackQuery) -> None:
+    logger.debug(f"{call.data} {call.from_user.id}")
     user_id = call.from_user.id
     message_id = call.message.message_id
     data = call.data.split(";")

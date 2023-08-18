@@ -5,32 +5,40 @@ from .db_functions import get_subscription_by_id, add_telegram_user,\
     get_one_users_subscription, get_subscriptions_for_user, get_not_subscriptions_for_user, telegram_user_exists
 import requests
 from telebot import types
+from loguru import logger
+from .functions import send_message
 
 @bot.message_handler(commands=["start"])
 async def handle_start_command(message: Message) -> None:
+    logger.info(f"{message.chat.id} {message.text}")
     uid = message.chat.id
     if not telegram_user_exists(uid):
-        add_telegram_user()
-    await bot.send_message(uid, ms.WELCOME_MESSAGE)
+        add_telegram_user(uid)
+    await send_message(uid, ms.WELCOME_MESSAGE)
 
 @bot.message_handler(commands=["joke"])
 async def joke_command(message: Message) -> None:
+    logger.info(f"{message.chat.id} {message.text}")
     joke_text = requests.get('https://geek-jokes.sameerkumar.website/api?format=json').json()["joke"]
-    await bot.send_message(message.chat.id, joke_text)
+    await send_message(message.chat.id, joke_text)
 
 @bot.message_handler(commands=["id"])
-async def joke_command(message: Message) -> None:
-    await bot.send_message(message.chat.id, str(message.chat.id))
+async def get_id_command(message: Message) -> None:
+    logger.info(f"{message.chat.id} {message.text}")
+    await send_message(message.chat.id, str(message.chat.id))
 
 @bot.message_handler(commands=["my_subscriptions"])
 async def my_subscriptions_command(message: Message) -> None:
+    logger.info(f"{message.chat.id} {message.text}")
     await show_my_subscriptions(message.chat.id)
 
 @bot.message_handler(commands=["subscribe"])
 async def subscribe_command(message: Message) -> None:
+    logger.info(f"{message.chat.id} {message.text}")
     await show_not_my_subscriptions(message.chat.id)
 
 async def show_subscriptions_list(sub_list:list, user_id, success_message, fail_message, is_my_subscriptions, changeable_message_id=None):
+    logger.debug(f"{sub_list=} {user_id=} {success_message=} {fail_message=} {is_my_subscriptions=} {changeable_message_id=}")
     if sub_list:
         keyboard = types.InlineKeyboardMarkup(row_width=1)
         for sub in sub_list:
@@ -39,22 +47,25 @@ async def show_subscriptions_list(sub_list:list, user_id, success_message, fail_
         if changeable_message_id:
             await bot.edit_message_text(success_message, user_id, changeable_message_id, reply_markup=keyboard)
         else:
-            await bot.send_message(user_id, success_message, reply_markup=keyboard)
+            await send_message(user_id, success_message, reply_markup=keyboard)
     else:
         if changeable_message_id:
             await bot.edit_message_text(fail_message, user_id, changeable_message_id)
         else:
-            await bot.send_message(user_id, fail_message)
+            await send_message(user_id, fail_message)
 
 async def show_my_subscriptions(user_id, changeable_message_id=None):
+    logger.debug(f"{user_id=} {changeable_message_id=}")
     subs = get_subscriptions_for_user(user_id)
     await show_subscriptions_list(subs, user_id, ms.YOUR_SUBSCRIPTIONS, ms.NO_SUBSCRIPTIONS, True, changeable_message_id)
 
 async def show_not_my_subscriptions(user_id, changeable_message_id=None):
+    logger.debug(f"{user_id=} {changeable_message_id=}")
     subs = get_not_subscriptions_for_user(user_id)
     await show_subscriptions_list(subs, user_id, ms.SUBSCRIPTIONS_YOU_NOT_SUBSCRIBED, ms.YOU_SUBSCRIBED_EVERYTHING, False, changeable_message_id)
 
 async def show_subscription_card(user_id, sub_id, changeable_message_id, callback_my_subs):
+    logger.debug(f"{sub_id=} {user_id=} {changeable_message_id=} {callback_my_subs=}")
     sub_info = get_subscription_by_id(sub_id)
     sub = get_one_users_subscription(user_id, sub_id)
     keyboard = types.InlineKeyboardMarkup(row_width=2)
@@ -81,4 +92,4 @@ async def show_subscription_card(user_id, sub_id, changeable_message_id, callbac
     if changeable_message_id:
         await bot.edit_message_text(text, user_id, changeable_message_id, reply_markup=keyboard)
     else:
-        await bot.send_message(user_id, text, reply_markup=keyboard)
+        await send_message(user_id, text, reply_markup=keyboard)
