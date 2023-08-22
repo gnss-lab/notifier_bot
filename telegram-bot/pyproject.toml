@@ -13,6 +13,7 @@ apscheduler = "^3.10.1"
 aiohttp = "^3.8.4"
 pydantic = {version = "1.10.11", extras = ["dotenv"]}
 loguru = "^0.7.0"
+pytest-cov = "^4.1.0"
 
 
 [build-system]
