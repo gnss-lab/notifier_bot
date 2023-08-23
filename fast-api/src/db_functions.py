@@ -6,9 +6,12 @@ from .models import UserInDB
 from loguru import logger
 
 class LockableSqliteConnection(object):
-    def __init__(self, db):
+    def __init__(self, db_folder, db_filename):
         self.lock = threading.Lock()
-        self.connection = sql.connect(db, uri=True, check_same_thread=False, detect_types=sql.PARSE_DECLTYPES | sql.PARSE_COLNAMES)
+        db_path = os.path.join(os.path.normpath(db_folder), db_filename)
+        if not os.path.isdir(db_folder):
+            os.makedirs(db_folder)
+        self.connection = sql.connect(db_path, uri=True, check_same_thread=False, detect_types=sql.PARSE_DECLTYPES | sql.PARSE_COLNAMES)
         self.cursor = None
         logger.info("create LockableSqliteConnection object")
 
@@ -24,12 +27,14 @@ class LockableSqliteConnection(object):
             self.cursor = None
         self.lock.release()
 
-DB_FILENAME = "main_bot.db"
-DB_FOLDER = "../telegram-bot/databases"
-DB_PATH = os.path.join(os.path.normpath(DB_FOLDER), DB_FILENAME)
-if not os.path.isdir(DB_FOLDER):
-    os.makedirs(DB_FOLDER)
-lsc = LockableSqliteConnection(DB_PATH)
+lsc = None
+
+def createLockableSqliteConnection(db_folder, db_filename):
+    global lsc
+    lsc = LockableSqliteConnection(db_folder, db_filename)
+
+createLockableSqliteConnection("../telegram-bot/databases", "main_bot.db")
+
 
 def add_user(user_id):
     logger.debug(f"{user_id=}")
