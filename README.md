@@ -1,3 +1,3 @@
-# [Telegram bot](/telegram-bot)
-# [FastApi service](/fast-api)
+# [Telegram bot](/telegram_bot)
+# [FastApi service](/fast_api)
  

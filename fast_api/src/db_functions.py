@@ -1,39 +1,17 @@
-import sqlite3 as sql
-import threading
-import os
-
 from .models import UserInDB
 from loguru import logger
-
-class LockableSqliteConnection(object):
-    def __init__(self, db_folder, db_filename):
-        self.lock = threading.Lock()
-        db_path = os.path.join(os.path.normpath(db_folder), db_filename)
-        if not os.path.isdir(db_folder):
-            os.makedirs(db_folder)
-        self.connection = sql.connect(db_path, uri=True, check_same_thread=False, detect_types=sql.PARSE_DECLTYPES | sql.PARSE_COLNAMES)
-        self.cursor = None
-        logger.info("create LockableSqliteConnection object")
-
-    def __enter__(self):
-        self.lock.acquire()
-        self.cursor = self.connection.cursor()
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.connection.commit()
-        if self.cursor is not None:
-            self.cursor.close()
-            self.cursor = None
-        self.lock.release()
+from lib.db_create import LockableSqliteConnection, create_tables
 
 lsc = None
 
 def createLockableSqliteConnection(db_folder, db_filename):
     global lsc
     lsc = LockableSqliteConnection(db_folder, db_filename)
+    logger.info("lsc object created")
+    create_tables(lsc)
+    logger.info("db tables created")
 
-createLockableSqliteConnection("../telegram-bot/databases", "main_bot.db")
+createLockableSqliteConnection("./telegram_bot/databases", "main_bot.db")
 
 
 def add_user(user_id):
@@ -41,6 +19,15 @@ def add_user(user_id):
     with lsc:
         lsc.cursor.execute(f"INSERT INTO users (id) VALUES (?)", (user_id,))
         return user_id
+
+def get_telegram_user(user_id):
+    logger.debug(f"{user_id=}")
+    with lsc:
+        lsc.cursor.execute(f"SELECT id FROM users WHERE id = ?", (user_id,))
+        result = lsc.cursor.fetchone()
+        if not result:
+            return None
+        return result[0]
 
 def add_subscription(name, description):
     logger.debug(f"{name=} {description=}")

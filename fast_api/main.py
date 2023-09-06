@@ -15,8 +15,6 @@ from typing import Annotated, Union
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-
-
 SECRET_KEY = os.getenv('FAST_API_SECRET')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -124,6 +122,14 @@ async def read_users_me(
 async def add_user(user_id: int, current_user: Annotated[User, Depends(get_current_user)]):
     """user_id = telegram_id"""
     logger.debug(f"{user_id=}")
+    user = db.get_telegram_user(user_id)
+    if user:
+        logger.error(f"Telegram user already exists {user_id=}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Telegram user already exists",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     user_id = db.add_user(user_id)
     return {"user_id":user_id}
 

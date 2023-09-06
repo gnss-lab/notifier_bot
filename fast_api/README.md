@@ -20,7 +20,7 @@ sudo apt install python3.10-venv
 git clone https://github.com/vankad24/Simurg.git
 cd Simurg
 git checkout development
-cd fast-api
+cd fast_api
 ```
 
 Создаём виртуальное окружение
@@ -44,8 +44,16 @@ poetry install
 ```
 
 ## Запуск
+*_Сначала нужно запустить бота!_*
 ```bash
-uvicorn main:app
+uvicorn main:app --reload --host 0.0.0.0
 ```
+ 
 После чего в браузере откройте
 *http://127.0.0.1:8000/*
+
+
+Где находятся логи
+
+Как запускать проект и тесты
+

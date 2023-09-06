@@ -1,8 +1,4 @@
 import asyncio
-import sqlite3 as sql
-import threading
-import os
-
 import requests
 from apscheduler.triggers.cron import CronTrigger
 from loguru import logger
@@ -10,90 +6,19 @@ from loguru import logger
 from .settings import settings, bot, scheduler
 from .dto import *
 from .functions import send_notification, schedule_notification
+from lib.db_create import LockableSqliteConnection, create_tables
 
-class LockableSqliteConnection(object):
-    def __init__(self, path):
-        self.lock = threading.Lock()
-        self.connection = sql.connect(path, uri=True, check_same_thread=False, detect_types=sql.PARSE_DECLTYPES | sql.PARSE_COLNAMES)
-        self.cursor = None
-        logger.info("create LockableSqliteConnection object")
+lsc = None
 
-    def __enter__(self):
-        self.lock.acquire()
-        self.cursor = self.connection.cursor()
-        return self
+def createLockableSqliteConnection(db_folder, db_filename):
+    global lsc
+    lsc = LockableSqliteConnection(db_folder, db_filename)
+    logger.info("lsc object created")
+    create_tables(lsc)
+    logger.info("db tables created")
 
-    def __exit__(self, type, value, traceback):
-        self.connection.commit()
-        if self.cursor is not None:
-            self.cursor.close()
-            self.cursor = None
-        self.lock.release()
+createLockableSqliteConnection("./telegram_bot/databases", "main_bot.db")
 
-DB_FILENAME = "main_bot.db"
-DB_FOLDER = "databases"
-DB_PATH = os.path.join(os.path.normpath(DB_FOLDER), DB_FILENAME)
-if not os.path.isdir(DB_FOLDER):
-    os.makedirs(DB_FOLDER)
-lsc = LockableSqliteConnection(DB_PATH)
-
-def create_tables():
-    with lsc:
-        lsc.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS notifications (
-              id INTEGER PRIMARY KEY,
-              message TEXT,
-              sub_id INTEGER,
-              initiator_id INTEGER,
-              processed INT DEFAULT 0,
-              created_on TIMESTAMP NOT NULL DEFAULT (datetime('now', 'localtime'))
-            );
-            """)
-        lsc.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS subscriptions (
-              id INTEGER PRIMARY KEY,
-              name TEXT,
-              description TEXT
-            );
-            """)
-        lsc.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users_subscriptions (
-              id INTEGER PRIMARY KEY,
-              sub_id INTEGER,
-              user_id INTEGER,
-              remind INT DEFAULT 0,
-              created_on TIMESTAMP NOT NULL DEFAULT (datetime('now', 'localtime'))
-            );
-            """)
-        lsc.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-              id INTEGER PRIMARY KEY
-              
-            );
-            """)
-        lsc.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS fastapi_users (
-              id INTEGER PRIMARY KEY,
-              email TEXT,
-              username TEXT,
-              hashed_password TEXT
-            );
-            """)
-        lsc.cursor.execute("""
-            CREATE TABLE IF NOT EXISTS monitored_services (
-              id INTEGER PRIMARY KEY,
-              url TEXT,
-              message TEXT,
-              sub_id INTEGER,
-              initiator_id INTEGER,
-              cron_time TEXT,
-              created_on TIMESTAMP NOT NULL DEFAULT (datetime('now', 'localtime')),
-              processed INTEGER DEFAULT 0,
-              need_delete INTEGER DEFAULT 0
-            );
-            """)
-
-create_tables()
 
 # Функция, проверяющая, не пришли ли новые уведомления
 async def check_db():
