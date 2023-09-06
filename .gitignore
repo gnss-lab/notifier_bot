@@ -1,8 +1,3 @@
-telegram-bot/secrets.py
-telegram-bot/Notes.txt
-telegram-bot/test.py
-
-
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
@@ -186,3 +181,5 @@ pyrightconfig.json
 telegram-bot-template-master
 */my_tests
 */logs
+
+Notes.txt
