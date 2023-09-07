@@ -8,17 +8,8 @@ from .dto import *
 from .functions import send_notification, schedule_notification
 from lib.db_create import LockableSqliteConnection, create_tables
 
-lsc = None
-
-def createLockableSqliteConnection(db_folder, db_filename):
-    global lsc
-    lsc = LockableSqliteConnection(db_folder, db_filename)
-    logger.info("lsc object created")
-    create_tables(lsc)
-    logger.info("db tables created")
-
-createLockableSqliteConnection("./telegram_bot/databases", "main_bot.db")
-
+lsc = LockableSqliteConnection("./databases", "main_bot.db")
+create_tables(lsc)
 
 # Функция, проверяющая, не пришли ли новые уведомления
 async def check_db():

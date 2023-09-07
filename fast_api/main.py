@@ -9,11 +9,12 @@ from passlib.context import CryptContext
 from src.logger import setup_logger
 from loguru import logger
 
-import src.db_functions as db
+from src.db_functions import DB
 from typing import Annotated, Union
 
 from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from lib.db_create import LockableSqliteConnection
 
 SECRET_KEY = os.getenv('FAST_API_SECRET')
 ALGORITHM = "HS256"
@@ -21,6 +22,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 setup_logger()
 app = FastAPI()
+
+lsc = LockableSqliteConnection("./databases", "main_bot.db")
+db = DB(lsc)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 send_notif_limiter = RequestLimiter(10)
