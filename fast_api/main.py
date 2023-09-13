@@ -186,8 +186,8 @@ async def delete_monitored_service(service_id: int, current_user: Annotated[User
     db.delete_monitored_service(service_id)
 
 @app.get("/monitored_service/update")
-async def update_monitored_service(ser_id: int, crontab: str, current_user: Annotated[User, Depends(get_current_user)]):
-    logger.debug(f"{ser_id=} {crontab=}")
+async def update_monitored_service(service_id: int, crontab: str, current_user: Annotated[User, Depends(get_current_user)]):
+    logger.debug(f"{service_id=} {crontab=}")
     try:
         CronTrigger.from_crontab(crontab)
     except ValueError as e:
@@ -196,35 +196,35 @@ async def update_monitored_service(ser_id: int, crontab: str, current_user: Anno
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect crontab string"
         )
-    db.update_monitored_service(ser_id, crontab)
-    return {"sub_id":ser_id}
+    db.update_monitored_service(service_id, crontab)
+    return {"ser_id":service_id}
 
 @app.get("/users/get")
-async def get_users():
+async def get_users(current_user: Annotated[User, Depends(get_current_user)]):
     logger.debug(f"")
     return db.get_users()
 
 @app.get("/subscriptions/get")
-async def get_subscriptions():
+async def get_subscriptions(current_user: Annotated[User, Depends(get_current_user)]):
     logger.debug(f"")
     return db.get_subscriptions()
 
 @app.get("/users_subscriptions/get")
-async def get_users_subscriptions():
+async def get_users_subscriptions(current_user: Annotated[User, Depends(get_current_user)]):
     logger.debug(f"")
     return db.get_users_subscriptions()
 
 @app.get("/notifications/get")
-async def get_notifications():
+async def get_notifications(current_user: Annotated[User, Depends(get_current_user)]):
     logger.debug(f"")
     return db.get_notifications()
 
 @app.get("/monitored_services/get")
-async def get_monitored_services():
+async def get_monitored_services(current_user: Annotated[User, Depends(get_current_user)]):
     logger.debug(f"")
     return db.get_monitored_services()
 
 @app.get("/monitored_service/get")
-async def get_monitored_service_by_id(ser_id: int):
+async def get_monitored_service_by_id(ser_id: int, current_user: Annotated[User, Depends(get_current_user)]):
     logger.debug(f"{ser_id=}")
     return db.get_monitored_service_by_id(ser_id)
