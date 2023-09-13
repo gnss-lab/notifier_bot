@@ -88,6 +88,15 @@ class DB:
             self.lsc.cursor.execute(f"SELECT * FROM subscriptions")
             result = self.lsc.cursor.fetchall()
             return result
+
+    def get_subscription_by_id(self, sub_id):
+        logger.debug(f"")
+        with self.lsc:
+            self.lsc.cursor.execute(f"SELECT * FROM subscriptions WHERE id = ?", (sub_id,))
+            r = self.lsc.cursor.fetchone()
+            if not r:
+                return None
+            return r
     
     def get_users_subscriptions(self, ):
         logger.debug(f"")

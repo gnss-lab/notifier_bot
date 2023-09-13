@@ -155,6 +155,13 @@ async def subscribe(current_user: Annotated[User, Depends(get_current_user)],
 async def send_notification_by_id(current_user: Annotated[User, Depends(get_current_user)],
                             message: str, sub_id: int):
     logger.debug(f"{message=} {sub_id=}")
+    sub = db.get_subscription_by_id(sub_id)
+    if not sub:
+        logger.error(f"Wrong id {sub_id=}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Wrong sub_id"
+        )
     notif_id = db.add_notification(message, sub_id, current_user.id)
     return {"notif_id":notif_id}
 
@@ -163,6 +170,12 @@ async def send_notification_by_name(current_user: Annotated[User, Depends(get_cu
                             message: str, sub_name: str):
     logger.debug(f"{message=} {sub_name=}")
     sub_id = db.get_subscription_id_by_name(sub_name)
+    if not sub_id:
+        logger.error(f"Wrong name {sub_name=}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Wrong sub_name"
+        )
     notif_id = db.add_notification(message, sub_id, current_user.id)
     return {"notif_id": notif_id}
 
