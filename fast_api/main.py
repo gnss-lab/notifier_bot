@@ -151,6 +151,13 @@ async def subscribe(current_user: Annotated[User, Depends(get_current_user)],
     usub_id = db.subscribe(sub_id, user_id, remind)
     return {"usub_id":usub_id}
 
+@app.get("/unsubscribe")
+async def unsubscribe(current_user: Annotated[User, Depends(get_current_user)],
+                    sub_id:int, user_id:int):
+    logger.debug(f"{sub_id=} {user_id=}")
+    db.unsubscribe(sub_id, user_id)
+    return {"sub_id": sub_id}
+
 @app.get("/send_notification_by_id", dependencies=[Depends(send_notif_limiter)])
 async def send_notification_by_id(current_user: Annotated[User, Depends(get_current_user)],
                             message: str, sub_id: int):

@@ -43,6 +43,11 @@ class DB:
             self.lsc.cursor.execute(f"SELECT MAX(id) FROM users_subscriptions")
             result = self.lsc.cursor.fetchone()
             return result[0]
+
+    def unsubscribe(self, sub_id, user_id):
+        logger.debug(f"{sub_id=} {user_id=}")
+        with self.lsc:
+            self.lsc.cursor.execute(f"DELETE FROM users_subscriptions WHERE sub_id=? AND user_id=?",(sub_id,user_id,))
     
     def add_notification(self, message, sub_id, initiator_id):
         logger.debug(f"{message=} {sub_id=} {initiator_id=}")
