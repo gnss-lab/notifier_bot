@@ -3,7 +3,7 @@
 ```bash
 sudo apt update && sudo apt install git docker.io -y
 ```
-### Добавляем себя в группу 'docker', чтобы не использовать **sudo**
+### Добавляем себя в группу 'docker', чтобы не использовать **sudo** (требуется перезагрузка)
 ```bash
 sudo usermod -aG docker $USER
 ```
@@ -25,6 +25,7 @@ docker build -t simurg_bot .
 ```bash
 docker run -p 8000:8000 -ti -d simurg_bot
 ```
+### После чего FastAPI должен быть доступен по адресу *http://127.0.0.1:8000/*
 
 ## Инструкция по запуску вручную
 - [Telegram bot](/telegram_bot/README.md)
