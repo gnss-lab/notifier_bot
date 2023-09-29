@@ -16,6 +16,10 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from lib.db_create import LockableSqliteConnection
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 SECRET_KEY = os.getenv('FAST_API_SECRET')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30

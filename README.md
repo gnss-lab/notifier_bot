@@ -15,8 +15,10 @@ git checkout development
 ```
 ### Создаём .env файл
 ```bash
-echo 'tg_token=<ваш токен>' > .env
+echo 'tg_token=<телеграм токен бота>' > .env
+echo 'FAST_API_SECRET=<секретный ключ>' >> .env
 ```
+- Для генерации секретного ключа можно использовать `openssl rand -hex 32`
 ### Создаём образ docker
 ```bash
 docker build -t simurg_bot .
