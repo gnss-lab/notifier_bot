@@ -23,9 +23,9 @@ echo 'FAST_API_SECRET=<секретный ключ>' >> .env
 ```bash
 docker build -t simurg_bot .
 ```
-### Запуск docker контейнера на порту 8000
+### Запуск docker контейнера на порту 8000 и монтированием папки 'databases'
 ```bash
-docker run -p 8000:8000 -ti -d simurg_bot
+docker run -p 8000:8000 -v "$(pwd)"/databases/:/app/databases/ -ti -d simurg_bot
 ```
 ### После чего FastAPI должен быть доступен по адресу *http://127.0.0.1:8000/*
 
