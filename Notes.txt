@@ -1,0 +1,23 @@
+
+//создать виртуальный раздел
+docker volume create my_volume
+
+//использование этого раздела в контейнере
+docker run --volume volume_name:/container/path
+//пример
+docker run -d -p 8000:8000 -v my_volume:/app my-image
+
+//можно напрямую подключить директорию
+docker run --volume /host/path:/container/path
+
+VOLUME в dockerfile???
+
+Ссылки которые пригодились, пока настраивал docker
+https://blog.logrocket.com/build-deploy-flask-app-using-docker/
+https://docs.docker.com/engine/reference/builder/
+https://pythonspeed.com/articles/activate-virtualenv-dockerfile/
+https://hub.docker.com/_/python
+
+https://stackoverflow.com/questions/72978485/git-submodule-update-failed-with-fatal-detected-dubious-ownership-in-repositor
+https://stackoverflow.com/questions/67679498/combining-volume-docker-run-v
+https://docs.docker.com/storage/bind-mounts/
